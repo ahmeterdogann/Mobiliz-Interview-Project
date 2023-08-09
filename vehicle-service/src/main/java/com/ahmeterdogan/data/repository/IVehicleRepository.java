@@ -1,30 +1,23 @@
 package com.ahmeterdogan.data.repository;
 
-import com.ahmeterdogan.data.entity.Fleet;
 import com.ahmeterdogan.data.entity.Vehicle;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface IVehicleRepository extends JpaRepository<Vehicle, Long> {
-    // Araç ekleme işlemi
-    Vehicle save(Vehicle vehicle);
+    int deleteById(long id);
 
-    // Araç silme işlemi
-    void deleteById(long id);
+    @Modifying
+    @Query("UPDATE Vehicle v SET v.plateNumber = :#{#vehicle.plateNumber}, v.brand = :#{#vehicle.brand}, v.model = :#{#vehicle.model}, v.modelYear = :#{#vehicle.modelYear}, v.chassisNumber = :#{#vehicle.chassisNumber}, v.label = :#{#vehicle.label}, v.group.id = :#{#vehicle.group.id} WHERE v.id = :#{#vehicle.id}")
+    Vehicle updateVehicle(@Param("vehicle") Vehicle vehicle);
 
-    // Id'ye göre araç getirme işlemi
-    Optional<Vehicle> findById(long id);
-
-    // Tüm araçları listeleme işlemi
-    List<Vehicle> findAll();
-
-    Fleet getFleetById(Long fleetId);
+    List<Vehicle> findAllByGroup_Id(Long groupId);
 }
 

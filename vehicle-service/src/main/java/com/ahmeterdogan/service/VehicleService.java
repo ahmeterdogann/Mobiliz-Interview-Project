@@ -1,42 +1,60 @@
 package com.ahmeterdogan.service;
 
+import com.ahmeterdogan.data.entity.UserVehicleAuthorization;
 import com.ahmeterdogan.data.entity.Vehicle;
-import com.ahmeterdogan.data.repository.IVehicleRepository;
+import com.ahmeterdogan.data.dal.VehicleServiceHelper;
 import com.ahmeterdogan.dto.VehicleDTO;
 import com.ahmeterdogan.mapper.IVehicleMapper;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class VehicleService {
-
-    private final IVehicleRepository vehicleRepository;
+    private final VehicleServiceHelper vehicleServiceHelper;
     private final IVehicleMapper vehicleMapper;
 
-    public VehicleService(IVehicleRepository vehicleRepository, IVehicleMapper vehicleMapper) {
-        this.vehicleRepository = vehicleRepository;
+    public VehicleService(VehicleServiceHelper vehicleServiceHelper, IVehicleMapper vehicleMapper) {
+        this.vehicleServiceHelper = vehicleServiceHelper;
         this.vehicleMapper = vehicleMapper;
     }
 
     public VehicleDTO saveVehicle(Vehicle vehicle) {
-        return vehicleMapper.toVehicleDTO(vehicleRepository.save(vehicle));
+        return vehicleMapper.toDto(vehicleServiceHelper.saveVehicle(vehicle));
     }
 
-    // Araç silme işlemi
-    public void deleteVehicle(long id) {
-        vehicleRepository.deleteById(id);
+    public List<VehicleDTO> saveAll(List<Vehicle> vehicles) {
+        return vehicleServiceHelper.saveAll(vehicles).stream().map(vehicleMapper::toDto).collect(Collectors.toList());
     }
 
-    // Id'ye göre araç getirme işlemi
     public Optional<VehicleDTO> getVehicleById(long id) {
-        return vehicleRepository.findById(id).map(vehicleMapper::toVehicleDTO);
+        return vehicleServiceHelper.getVehicleById(id).map(vehicleMapper::toDto);
     }
 
-    // Tüm araçları listeleme işlemi
     public List<VehicleDTO> getAllVehicles() {
-        return vehicleRepository.findAll().stream().map(vehicleMapper::toVehicleDTO).collect(Collectors.toList());
+        return vehicleServiceHelper.getAllVehicles().stream().map(vehicleMapper::toDto).collect(Collectors.toList());
+    }
+
+    public VehicleDTO updateVehicleById(Vehicle vehicle) {
+        return vehicleMapper.toDto(vehicleServiceHelper.updateVehicleById(vehicle));
+    }
+
+    public int deleteVehicleById(long id) {
+        return vehicleServiceHelper.deleteVehicleById(id);
+    }
+
+    public List<VehicleDTO> getAllVehiclesByGroupId(long id) {
+        return vehicleServiceHelper.getAllVehiclesByGroupId(id).stream().map(vehicleMapper::toDto).collect(Collectors.toList());
+    }
+
+    public boolean isUserAuthToVehicle(long userId, long vehicleId) {
+        UserVehicleAuthorization userVehicleAuthorization = vehicleServiceHelper.userVehicleAuthRecord(userId, vehicleId);
+
+        if (userVehicleAuthorization.getUser().getId() != null && userVehicleAuthorization.getVehicle().getId() != null)
+            return true;
+        else
+            return false;
     }
 
 }

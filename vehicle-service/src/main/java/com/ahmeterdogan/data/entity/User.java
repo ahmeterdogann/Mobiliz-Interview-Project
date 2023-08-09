@@ -1,3 +1,4 @@
+
 package com.ahmeterdogan.data.entity;
 
 import jakarta.persistence.Column;
@@ -11,9 +12,9 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(
-        name = "groups"
+        name = "users"
 )
-public class Group {
+public class User {
     @Id
     @GeneratedValue(
             strategy = GenerationType.IDENTITY
@@ -21,30 +22,35 @@ public class Group {
     private Long id;
     @Column(
             name = "name",
-            length = 100,
             nullable = false
     )
     private String name;
+    @Column(
+            name = "surname",
+            nullable = false
+    )
+    private String surname;
     @ManyToOne
     @JoinColumn(
             name = "company_id",
-            nullable = false
+            referencedColumnName = "id"
     )
     private Company company;
     @Column(
-            name = "root",
+            name = "role",
             nullable = false
     )
-    private boolean isRoot;
+    private String role;
 
-    public Group(Long id, String name, Company company, boolean isRoot) {
+    public User(Long id, String name, String surname, Company company, String role) {
         this.id = id;
         this.name = name;
+        this.surname = surname;
         this.company = company;
-        this.isRoot = isRoot;
+        this.role = role;
     }
 
-    public Group() {
+    public User() {
     }
 
     public Long getId() {
@@ -63,6 +69,14 @@ public class Group {
         this.name = name;
     }
 
+    public String getSurname() {
+        return this.surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
     public Company getCompany() {
         return this.company;
     }
@@ -71,11 +85,11 @@ public class Group {
         this.company = company;
     }
 
-    public boolean isRoot() {
-        return this.isRoot;
+    public String getRole() {
+        return this.role;
     }
 
-    public void setRoot(boolean root) {
-        this.isRoot = root;
+    public void setRole(String role) {
+        this.role = role;
     }
 }
