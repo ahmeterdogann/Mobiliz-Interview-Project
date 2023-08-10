@@ -29,7 +29,7 @@ public class GroupController {
     }
 
     @GetMapping("/user-vehicles-tree")
-    public ResponseEntity<List<GroupVehicleTreeDTO>> getUserVehicleTree(@RequestParam long userId) {
+    public ResponseEntity<List<GroupVehicleTreeDTO>> getUserVehicleTree(@RequestParam("userId") long userId) {
         return ResponseEntity.ok(groupService.getUserVehicleTrees(userId));
     }
 

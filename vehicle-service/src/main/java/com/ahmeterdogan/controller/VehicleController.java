@@ -3,6 +3,7 @@ package com.ahmeterdogan.controller;
 import com.ahmeterdogan.data.entity.Vehicle;
 import com.ahmeterdogan.dto.VehicleDTO;
 import com.ahmeterdogan.service.VehicleService;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,8 +40,8 @@ public class VehicleController {
         return ResponseEntity.ok(vehicles);
     }
 
-    @GetMapping("/get-vehicles-by-group-id")
-    public ResponseEntity<List<VehicleDTO>> getAllVehiclesByGroupId(@RequestParam("groupId") long groupId) {
+    @GetMapping("/get-vehicles-by-group-id/{groupId}")
+    public ResponseEntity<List<VehicleDTO>> getAllVehiclesByGroupId(@PathVariable("groupId") long groupId) {
         return ResponseEntity.ok(vehicleService.getAllVehiclesByGroupId(groupId));
     }
 

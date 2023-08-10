@@ -1,10 +1,10 @@
 package com.ahmeterdogan.service;
 
-import com.ahmeterdogan.call.ServiceCall;
 import com.ahmeterdogan.data.dal.GroupServiceHelper;
 import com.ahmeterdogan.data.entity.Group;
 import com.ahmeterdogan.dto.GroupVehicleTreeDTO;
 import com.ahmeterdogan.dto.VehicleDTO;
+import com.ahmeterdogan.manager.IVehicleManager;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -13,11 +13,11 @@ import java.util.List;
 @Service
 public class GroupService {
     private final GroupServiceHelper groupServiceHelper;
-    private final ServiceCall serviceCall;
+    private final IVehicleManager vehicleManager;
 
-    public GroupService(GroupServiceHelper groupServiceHelper, ServiceCall serviceCall) {
+    public GroupService(GroupServiceHelper groupServiceHelper, IVehicleManager vehicleManager) {
         this.groupServiceHelper = groupServiceHelper;
-        this.serviceCall = serviceCall;
+        this.vehicleManager = vehicleManager;
     }
 
     public Group getParent(Group group) {
@@ -52,7 +52,7 @@ public class GroupService {
             dto.addChild(childDto);
         }
 
-                List<VehicleDTO> vehicles = serviceCall.getVehiclesByGroupId(group.getId());
+                List<VehicleDTO> vehicles = vehicleManager.getAllVehiclesByGroupId(group.getId()).getBody();
                 dto.setVehicles(vehicles);
 
         return dto;

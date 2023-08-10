@@ -58,4 +58,5 @@ public class VehicleDTO {
     public void setModelYear(int modelYear) {
         this.modelYear = modelYear;
     }
+
 }
