@@ -3,8 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Mobiliz Interview Project.iml" filepath="$PROJECT_DIR$/.idea/Mobiliz Interview Project.iml" />
-      <module fileurl="file://$PROJECT_DIR$/group-service/group-service.iml" filepath="$PROJECT_DIR$/group-service/group-service.iml" />
-      <module fileurl="file://$PROJECT_DIR$/vehicle-service/vehicle-service.iml" filepath="$PROJECT_DIR$/vehicle-service/vehicle-service.iml" />
     </modules>
   </component>
 </project>
