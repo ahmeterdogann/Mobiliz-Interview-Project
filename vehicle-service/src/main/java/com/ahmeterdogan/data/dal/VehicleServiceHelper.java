@@ -23,7 +23,7 @@ public class VehicleServiceHelper {
     }
 
     public Vehicle saveVehicle(Vehicle vehicle) {
-        return vehicleRepository.save(vehicle);
+        return vehicleRepository.save(vehicle).builder().build();
     }
 
     public List<Vehicle> saveAll(List<Vehicle> vehicles) {

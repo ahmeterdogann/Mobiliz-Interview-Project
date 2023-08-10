@@ -1,4 +1,4 @@
-package com.ahmeterdogan.manager;
+package com.ahmeterdogan.feign;
 
 import com.ahmeterdogan.dto.VehicleDTO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @FeignClient(url = "http://localhost:8081/api/vehicles",name = "vehicle-service")
-public interface IVehicleManager {
+public interface IVehicleServiceFeign {
 
     @GetMapping("/get-vehicles-by-group-id/{groupId}")
     public ResponseEntity<List<VehicleDTO>> getAllVehiclesByGroupId(@PathVariable("groupId") long groupId);

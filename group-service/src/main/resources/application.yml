@@ -8,7 +8,6 @@ spring:
     url: jdbc:postgresql://localhost:5432/mobiliz
     username: postgres
     password: ahmet1903
-
     jpa:
       show-sql: true
 
