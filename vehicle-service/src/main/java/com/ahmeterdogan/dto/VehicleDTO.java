@@ -1,62 +1,32 @@
 package com.ahmeterdogan.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.Objects;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
 public class VehicleDTO {
     private long id;
     private String plateNumber;
     private String brand;
     private String model;
     private int modelYear;
+    private String groupName;
 
-    public VehicleDTO(long id, String plateNumber, String brand, String model, int modelYear) {
-        this.id = id;
-        this.plateNumber = plateNumber;
-        this.brand = brand;
-        this.model = model;
-        this.modelYear = modelYear;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        VehicleDTO that = (VehicleDTO) o;
+        return id == that.id;
     }
 
-    public VehicleDTO() {
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getPlateNumber() {
-        return plateNumber;
-    }
-
-    public void setPlateNumber(String plateNumber) {
-        this.plateNumber = plateNumber;
-    }
-
-    public String getBrand() {
-        return brand;
-    }
-
-    public void setBrand(String brand) {
-        this.brand = brand;
-    }
-
-    public String getModel() {
-        return model;
-    }
-
-    public void setModel(String model) {
-        this.model = model;
-    }
-
-    public int getModelYear() {
-        return modelYear;
-    }
-
-    public void setModelYear(int modelYear) {
-        this.modelYear = modelYear;
-    }
-
 }
