@@ -1,14 +1,15 @@
 package com.ahmeterdogan.dto.request;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
-public class UserDTORequest {
-    public Long id;
+public class UserSaveRequestDto {
     public String name;
     public String surname;
     public long companyId;

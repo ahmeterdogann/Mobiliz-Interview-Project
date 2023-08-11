@@ -1,12 +1,16 @@
 package com.ahmeterdogan.data.entity;
 
+import com.ahmeterdogan.data.entity.User;
 import com.ahmeterdogan.data.enums.Roles;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @Entity

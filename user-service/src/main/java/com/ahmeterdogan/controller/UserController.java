@@ -1,13 +1,10 @@
 package com.ahmeterdogan.controller;
 
-import com.ahmeterdogan.data.entity.User;
-import com.ahmeterdogan.dto.response.UserDTO;
+import com.ahmeterdogan.dto.request.UserSaveRequestDto;
+import com.ahmeterdogan.dto.response.UserResponseDto;
 import com.ahmeterdogan.service.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -19,7 +16,12 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable long id) {
+    public ResponseEntity<UserResponseDto> getUserById(@PathVariable long id) {
         return userService.getUserById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/save")
+    public ResponseEntity<UserResponseDto> save(@RequestBody UserSaveRequestDto userSaveRequestDto) {
+        return ResponseEntity.ok(userService.save(userSaveRequestDto));
     }
 }

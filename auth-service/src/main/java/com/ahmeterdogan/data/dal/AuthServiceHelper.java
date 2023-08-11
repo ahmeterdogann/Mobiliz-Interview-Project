@@ -1,6 +1,8 @@
 package com.ahmeterdogan.data.dal;
 
 import com.ahmeterdogan.data.entity.AuthTable;
+import com.ahmeterdogan.data.entity.User;
+import com.ahmeterdogan.data.enums.Roles;
 import com.ahmeterdogan.data.repository.IUserAuthRepository;
 import org.springframework.stereotype.Component;
 
@@ -14,5 +16,17 @@ public class AuthServiceHelper {
 
     public AuthTable findByUsernameAndPassword(String username, String password) {
         return userAuthRepository.findByUsernameAndPassword(username, password);
+    }
+
+    public AuthTable save(String username, String password, User user, Roles role) {
+        AuthTable authTable = AuthTable.
+                builder().
+                username(username).
+                password(password).
+                user(user).
+                role(role).
+                build();
+
+        return userAuthRepository.save(authTable);
     }
 }

@@ -1,12 +1,15 @@
 package com.ahmeterdogan.dto.response;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class UserDTO {
+public class UserResponseDto {
     public Long id;
     public String name;
     public String surname;

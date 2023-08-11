@@ -1,12 +1,11 @@
 package com.ahmeterdogan.controller;
 
-import com.ahmeterdogan.dto.response.UserAuthDTO;
+import com.ahmeterdogan.dto.request.UserRegisterRequestDto;
+import com.ahmeterdogan.dto.response.UserAuthResponseDto;
+import com.ahmeterdogan.dto.response.UserRegisterResponseDto;
 import com.ahmeterdogan.service.AuthService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -18,8 +17,13 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public ResponseEntity<UserAuthDTO> login(@RequestHeader("username") String username,
-                                             @RequestHeader("password") String password) {
+    public ResponseEntity<UserAuthResponseDto> login(@RequestHeader("username") String username,
+                                                     @RequestHeader("password") String password) {
         return ResponseEntity.ok(authService.login(username, password));
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<UserRegisterResponseDto> register(@RequestBody UserRegisterRequestDto userRegisterRequestDto) {
+        return ResponseEntity.ok(authService.register(userRegisterRequestDto));
     }
 }

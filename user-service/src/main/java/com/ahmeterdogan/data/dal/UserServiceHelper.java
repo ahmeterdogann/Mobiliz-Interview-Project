@@ -18,4 +18,8 @@ public class UserServiceHelper {
     public Optional<User> getUserById(long id) {
         return userRepository.findById(id);
     }
+
+    public User save(User user) {
+        return userRepository.save(user);
+    }
 }
