@@ -2,63 +2,42 @@ package com.ahmeterdogan.service;
 
 import com.ahmeterdogan.data.dal.GroupServiceHelper;
 import com.ahmeterdogan.data.entity.Group;
+import com.ahmeterdogan.dto.GroupDto;
 import com.ahmeterdogan.dto.GroupVehicleTreeDTO;
 import com.ahmeterdogan.dto.VehicleDTO;
-import com.ahmeterdogan.feign.IVehicleServiceFeign;
+import com.ahmeterdogan.util.TreeOfGroupOfUser;
+import com.ahmeterdogan.util.TreeOfGroupOfUserFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 @Service
 public class GroupService {
     private final GroupServiceHelper groupServiceHelper;
-    private final IVehicleServiceFeign vehicleServiceFeign;
+    private final TreeOfGroupOfUserFactory treeOfGroupOfUserFactory;
 
-    public GroupService(GroupServiceHelper groupServiceHelper, IVehicleServiceFeign vehicleServiceFeign) {
+    public GroupService(GroupServiceHelper groupServiceHelper, TreeOfGroupOfUserFactory treeOfGroupOfUserFactory) {
         this.groupServiceHelper = groupServiceHelper;
-        this.vehicleServiceFeign = vehicleServiceFeign;
+        this.treeOfGroupOfUserFactory = treeOfGroupOfUserFactory;
     }
 
-    public Group getParent(Group group) {
-        return groupServiceHelper.getParent(group);
-    }
-
-    public List<Group> getChilds(Group group) {
-        return groupServiceHelper.getChilds(group);
-    }
-
-    private List<Group> getUserGroupAuth(long userId) {
+    private Set<Group> getUserGroupAuth(long userId) {
         return groupServiceHelper.getUserGroupAuth(userId);
     }
 
-    public List<GroupVehicleTreeDTO> getUserVehicleTrees(long userId) {
-        List<Group> groups = getUserGroupAuth(userId);
-        List<GroupVehicleTreeDTO> trees = new ArrayList<>();
-
-        for (Group group : groups) {
-            trees.add(convertToGroupVehicleDTO(group));
-        }
-
-        return trees;
+    public Set<GroupVehicleTreeDTO> getTreeOfGroupUserWithVehicle(long userId) {
+        TreeOfGroupOfUser treeOfGroupOfUser = treeOfGroupOfUserFactory.createTreeOfGroupOfUser();
+        return treeOfGroupOfUser.buildTreeOfGroupOfUserWithVehicle(userId);
     }
 
-    private GroupVehicleTreeDTO convertToGroupVehicleDTO(Group group) {
-        GroupVehicleTreeDTO dto = new GroupVehicleTreeDTO(group.getId(), group.getName());
 
-        List<Group> childGroups = getChilds(group);
-        for (Group childGroup : childGroups) {
-            GroupVehicleTreeDTO childDto = convertToGroupVehicleDTO(childGroup);
-            dto.addChild(childDto);
-        }
-
-                List<VehicleDTO> vehicles = vehicleServiceFeign.getAllVehiclesByGroupId(group.getId()).getBody();
-                dto.setVehicles(vehicles);
-
-        return dto;
+    public Set<VehicleDTO> getUserVehicleList(long userId) {
+        TreeOfGroupOfUser treeOfGroupOfUser = treeOfGroupOfUserFactory.createTreeOfGroupOfUser();
+        return treeOfGroupOfUser.getUserVehicleList(userId);
     }
 
-    public List<VehicleDTO> getUserVehicleList(long userId) {
-        return new ArrayList<VehicleDTO>();
+    public Set<GroupDto> getListOfGroupOfUser(long userId) {
+        TreeOfGroupOfUser treeOfGroupOfUser = treeOfGroupOfUserFactory.createTreeOfGroupOfUser();
+        return treeOfGroupOfUser.getListOfGroupOfUser(userId);
     }
 }

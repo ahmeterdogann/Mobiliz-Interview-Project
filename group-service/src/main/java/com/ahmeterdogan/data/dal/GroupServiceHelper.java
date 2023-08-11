@@ -5,8 +5,7 @@ import com.ahmeterdogan.data.repository.IGroupRepository;
 import com.ahmeterdogan.data.repository.IGroupToGroupRepository;
 import com.ahmeterdogan.data.repository.IUserGroupAuthRepository;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
+import java.util.Set;
 
 @Component
 public class GroupServiceHelper {
@@ -25,11 +24,11 @@ public class GroupServiceHelper {
         return groupToGroupRepository.findParent(group.getId());
     }
 
-    public List<Group> getChilds(Group group) {
+    public Set<Group> getChildren(Group group) {
         return groupToGroupRepository.findAllByParentGroup(group.getId());
     }
 
-    public List<Group> getUserGroupAuth(long userId) {
+    public Set<Group> getUserGroupAuth(long userId) {
         return userGroupAuthRepository.findAllGroupsByUser(userId);
     }
 

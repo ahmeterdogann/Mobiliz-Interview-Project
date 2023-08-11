@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(url = "http://localhost:8081/api/vehicles",name = "vehicle-service")
+@FeignClient(url = "http://localhost:8081/api/v1/vehicles",name = "vehicle-service")
 public interface IVehicleServiceFeign {
 
     @GetMapping("/get-vehicles-by-group-id/{groupId}")

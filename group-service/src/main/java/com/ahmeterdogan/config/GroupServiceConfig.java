@@ -6,8 +6,10 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class GroupServiceConfig {
+
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
+
 }

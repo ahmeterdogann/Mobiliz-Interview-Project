@@ -1,56 +1,51 @@
 package com.ahmeterdogan.dto;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.util.*;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class GroupVehicleTreeDTO {
     private Long id;
     private String name;
-    private List<VehicleDTO> vehicles;
-    private Set<GroupVehicleTreeDTO> subGroups;
+    private List<VehicleDTO> vehiclesOfGroup;
+    private Set<GroupVehicleTreeDTO> children;
+    public static List<VehicleDTO> allVehiclesInTree = new ArrayList<>();
 
     public GroupVehicleTreeDTO(Long id, String name) {
         this.id = id;
         this.name = name;
-        this.subGroups = new HashSet<>();
-        vehicles = new ArrayList<>();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+        this.children = new HashSet<>();
+        vehiclesOfGroup = new ArrayList<>();
+        allVehiclesInTree = new ArrayList<>();
     }
 
     public void addChild(GroupVehicleTreeDTO groupVehicleTreeDTO) {
-        subGroups.add(groupVehicleTreeDTO);
+        children.add(groupVehicleTreeDTO);
     }
 
-    public Set<GroupVehicleTreeDTO> getSubGroups() {
-        return subGroups;
+    public static List<VehicleDTO> getAllVehiclesInTree() {
+        return allVehiclesInTree;
     }
 
-    public void setSubGroups(Set<GroupVehicleTreeDTO> subGroups) {
-        this.subGroups = subGroups;
+    public static void setAllVehiclesInTree(List<VehicleDTO> allVehiclesInTree) {
+        GroupVehicleTreeDTO.allVehiclesInTree = allVehiclesInTree;
     }
 
-    public List<VehicleDTO> getVehicles() {
-        return vehicles;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GroupVehicleTreeDTO that = (GroupVehicleTreeDTO) o;
+        return Objects.equals(id, that.id);
     }
 
-    public void setVehicles(List<VehicleDTO> vehicles) {
-        this.vehicles = vehicles;
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

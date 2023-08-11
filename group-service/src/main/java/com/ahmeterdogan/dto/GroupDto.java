@@ -6,23 +6,21 @@ import lombok.NoArgsConstructor;
 
 import java.util.Objects;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Data
-public class VehicleDTO {
+@NoArgsConstructor
+@AllArgsConstructor
+public class GroupDto {
     private Long id;
-    private String plateNumber;
-    private String brand;
-    private String model;
-    private int modelYear;
-    private String groupName;
+    private String name;
+    private Long companyId;
+    private boolean isRoot;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        VehicleDTO that = (VehicleDTO) o;
-        return id == that.id;
+        GroupDto groupDto = (GroupDto) o;
+        return Objects.equals(id, groupDto.id);
     }
 
     @Override
