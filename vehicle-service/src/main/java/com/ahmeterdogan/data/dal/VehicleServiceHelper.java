@@ -1,5 +1,6 @@
 package com.ahmeterdogan.data.dal;
 
+import com.ahmeterdogan.data.entity.User;
 import com.ahmeterdogan.data.entity.UserVehicleAuthorization;
 import com.ahmeterdogan.data.entity.Vehicle;
 import com.ahmeterdogan.data.repository.IUserVehicleAuthorizationRepository;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Component
 public class VehicleServiceHelper {
@@ -40,5 +42,18 @@ public class VehicleServiceHelper {
 
     public int deleteVehicleByIdAndCompanyId(long id, long companyId) {
         return vehicleRepository.deleteByIdAndCompany_Id(id, companyId);
+    }
+
+    public void saveUserVehicleAuth(Vehicle vehicle, User user) {
+        UserVehicleAuthorization userVehicleAuthorization = UserVehicleAuthorization.builder()
+                .user(user)
+                .vehicle(vehicle)
+                .build();
+
+        userVehicleAuthorizationRepository.save(userVehicleAuthorization);
+    }
+
+    public List<UserVehicleAuthorization> getDirectlyAuthorizedVehicles(long userId) {
+        return userVehicleAuthorizationRepository.findAllByUser_Id(userId);
     }
 }

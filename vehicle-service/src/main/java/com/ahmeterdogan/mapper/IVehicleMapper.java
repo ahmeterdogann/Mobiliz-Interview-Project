@@ -1,5 +1,6 @@
 package com.ahmeterdogan.mapper;
 import com.ahmeterdogan.data.entity.Vehicle;
+import com.ahmeterdogan.dto.request.VehicleGroupUpdateDTO;
 import com.ahmeterdogan.dto.response.VehicleResponseDTO;
 import com.ahmeterdogan.dto.request.VehicleUpdateDTO;
 import com.ahmeterdogan.dto.request.VehicleSaveDTO;
@@ -14,6 +15,16 @@ public interface IVehicleMapper{
     @Mapping(source="groupName", target="group.name")
     Vehicle toEntity(VehicleResponseDTO vehicleResponseDTO);
 
+    @Mapping(source="groupId", target="group.id")
     Vehicle toEntity(VehicleSaveDTO vehicleSaveDTO);
+    @Mapping(source="groupId", target="group.id")
+    @Mapping(source="companyId", target="company.id")
     Vehicle toEntity(VehicleUpdateDTO vehicleUpdateDTO);
+
+    @Mapping(source="groupId", target="group.id")
+    Vehicle toEntity(VehicleGroupUpdateDTO vehicleGroupUpdateDTO);
+
+    @Mapping(source="group.id", target="groupId")
+    @Mapping(source="company.id", target="companyId")
+    VehicleUpdateDTO toUpdateDto(Vehicle vehicle);
 }

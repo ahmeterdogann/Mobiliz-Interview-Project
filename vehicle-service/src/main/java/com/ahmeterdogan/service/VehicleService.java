@@ -1,19 +1,23 @@
 package com.ahmeterdogan.service;
 
 import com.ahmeterdogan.data.entity.Company;
+import com.ahmeterdogan.data.entity.Group;
+import com.ahmeterdogan.data.entity.User;
 import com.ahmeterdogan.data.entity.Vehicle;
 import com.ahmeterdogan.data.dal.VehicleServiceHelper;
 import com.ahmeterdogan.data.enums.Roles;
 import com.ahmeterdogan.dto.GroupDTO;
+import com.ahmeterdogan.dto.request.*;
+import com.ahmeterdogan.dto.response.UserResponseDTO;
 import com.ahmeterdogan.dto.response.VehicleResponseDTO;
-import com.ahmeterdogan.dto.request.GeneralRequestHeaderDto;
-import com.ahmeterdogan.dto.request.VehicleUpdateDTO;
-import com.ahmeterdogan.dto.request.VehicleSaveDTO;
 import com.ahmeterdogan.feign.IGroupServiceFeign;
+import com.ahmeterdogan.feign.IUserMapper;
+import com.ahmeterdogan.feign.IUserServiceFeign;
 import com.ahmeterdogan.mapper.IGroupMapper;
 import com.ahmeterdogan.mapper.IVehicleMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,24 +27,28 @@ public class VehicleService {
     private final VehicleServiceHelper vehicleServiceHelper;
     private final IVehicleMapper vehicleMapper;
     private final IGroupMapper groupMapper;
+    private final IUserMapper userMapper;
     private final ObjectMapper objectMapper;
     private final IGroupServiceFeign groupServiceFeign;
+    private final IUserServiceFeign userServiceFeign;
 
-    public VehicleService(VehicleServiceHelper vehicleServiceHelper, IVehicleMapper vehicleMapper, IGroupMapper groupMapper, ObjectMapper objectMapper, IGroupServiceFeign groupServiceFeign) {
+    public VehicleService(VehicleServiceHelper vehicleServiceHelper, IVehicleMapper vehicleMapper, IGroupMapper groupMapper, IUserMapper userMapper, ObjectMapper objectMapper, IGroupServiceFeign groupServiceFeign, IUserServiceFeign userServiceFeign) {
         this.vehicleServiceHelper = vehicleServiceHelper;
         this.vehicleMapper = vehicleMapper;
         this.groupMapper = groupMapper;
+        this.userMapper = userMapper;
         this.objectMapper = objectMapper;
         this.groupServiceFeign = groupServiceFeign;
+        this.userServiceFeign = userServiceFeign;
     }
 
     public VehicleResponseDTO saveVehicle(String generalRequestHeader, VehicleSaveDTO vehicleSaveDTO) {
-        GeneralRequestHeaderDto generalRequestHeaderDto = generalHeaderRequestConverter(generalRequestHeader);
+        GeneralRequestHeaderDTO generalRequestHeaderDto = generalHeaderRequestConverter(generalRequestHeader);
 
-        if (generalRequestHeaderDto.getRoles() != Roles.COMPANY_ADMIN)
+        if (generalRequestHeaderDto.getRole() != Roles.COMPANY_ADMIN)
             throw new RuntimeException("User is not authorized to save vehicle");
 
-        GroupDTO groupDTO = groupServiceFeign.getGroupByName(generalRequestHeader, vehicleSaveDTO.getGroupName());
+        GroupDTO groupDTO = groupServiceFeign.getById(generalRequestHeader, vehicleSaveDTO.getGroupId());
 
         Vehicle vehicle = vehicleMapper.toEntity(vehicleSaveDTO);
         vehicle.setGroup(groupMapper.toEntity(groupDTO));
@@ -58,9 +66,9 @@ public class VehicleService {
 
     public List<VehicleResponseDTO> getAllVehicles(String generalRequestHeader) {
 
-        GeneralRequestHeaderDto generalRequestHeaderDto = generalHeaderRequestConverter(generalRequestHeader);
+        GeneralRequestHeaderDTO generalRequestHeaderDto = generalHeaderRequestConverter(generalRequestHeader);
 
-        if (generalRequestHeaderDto.getRoles() != Roles.COMPANY_ADMIN)
+        if (generalRequestHeaderDto.getRole() != Roles.COMPANY_ADMIN)
             throw new RuntimeException("User is not authorized to get all vehicles");
 
         return vehicleServiceHelper.getAllVehicles(generalRequestHeaderDto.getCompanyId()).stream().map(vehicleMapper::toDto).collect(Collectors.toList());
@@ -69,7 +77,7 @@ public class VehicleService {
     }
 
     public Optional<VehicleResponseDTO> getVehicleById(String generalRequestHeader, long vehicleId) {
-        GeneralRequestHeaderDto generalRequestHeaderDto = generalHeaderRequestConverter(generalRequestHeader);
+        GeneralRequestHeaderDTO generalRequestHeaderDto = generalHeaderRequestConverter(generalRequestHeader);
 
         if (isAdmin(generalRequestHeaderDto))
             return vehicleServiceHelper.getVehicleByIdAndCompanyId(generalRequestHeaderDto.getCompanyId(), vehicleId).map(vehicleMapper::toDto);
@@ -83,7 +91,7 @@ public class VehicleService {
     public List<VehicleResponseDTO> getAllVehiclesByGroupName(String generalRequestHeader, String groupName) {
 
         GroupDTO groupDTO = groupServiceFeign.getGroupByName(generalRequestHeader, groupName);
-        GeneralRequestHeaderDto generalRequestHeaderDto = generalHeaderRequestConverter(generalRequestHeader);
+        GeneralRequestHeaderDTO generalRequestHeaderDto = generalHeaderRequestConverter(generalRequestHeader);
 
         if (isAdmin(generalRequestHeaderDto))
             vehicleServiceHelper.getAllVehiclesByCompanyIdAndGroupId(generalRequestHeaderDto.getCompanyId(), groupDTO.getId()).stream()
@@ -95,7 +103,7 @@ public class VehicleService {
 
     }
 
-    private List<VehicleResponseDTO> getAllVehiclesByGroupNameWorkForStandardUser(GeneralRequestHeaderDto generalRequestHeader, GroupDTO groupDTO) {
+    private List<VehicleResponseDTO> getAllVehiclesByGroupNameWorkForStandardUser(GeneralRequestHeaderDTO generalRequestHeader, GroupDTO groupDTO) {
         Set<GroupDTO> userGroups = groupServiceFeign.getGroupListByUser(generalRequestHeader.toString());
 
         if (!userGroups.contains(groupDTO))
@@ -107,12 +115,12 @@ public class VehicleService {
 
     public VehicleResponseDTO updateVehicle(String generalRequestHeader, VehicleUpdateDTO vehicleUpdateDTO) {
 
-        GeneralRequestHeaderDto generalRequestHeaderDto = generalHeaderRequestConverter(generalRequestHeader);
+        GeneralRequestHeaderDTO generalRequestHeaderDto = generalHeaderRequestConverter(generalRequestHeader);
 
         if (!isAdmin(generalRequestHeaderDto))
             throw new RuntimeException("User is not authorized to update vehicle");
 
-        Optional<Vehicle> vehicleOptional = vehicleServiceHelper.getVehicleByIdAndCompanyId(generalRequestHeaderDto.getCompanyId(), vehicleUpdateDTO.getId());
+        Optional<Vehicle> vehicleOptional = vehicleServiceHelper.getVehicleByIdAndCompanyId(vehicleUpdateDTO.getId(),generalRequestHeaderDto.getCompanyId());
 
         if (vehicleOptional.isPresent())
             return vehicleMapper.toDto(vehicleServiceHelper.saveVehicle(vehicleMapper.toEntity(vehicleUpdateDTO)));
@@ -122,7 +130,7 @@ public class VehicleService {
     }
 
     public int deleteVehicleByIdAndCompanyId(String generalRequestHeader, long id) {
-        GeneralRequestHeaderDto generalRequestHeaderDto = generalHeaderRequestConverter(generalRequestHeader);
+        GeneralRequestHeaderDTO generalRequestHeaderDto = generalHeaderRequestConverter(generalRequestHeader);
 
         if (!isAdmin(generalRequestHeaderDto))
             throw new RuntimeException("User is not authorized to delete vehicle");
@@ -131,16 +139,89 @@ public class VehicleService {
     }
 
 
-    private boolean isAdmin(GeneralRequestHeaderDto generalRequestHeaderDto) {
-        return generalRequestHeaderDto.getRoles() == Roles.COMPANY_ADMIN;
+    private boolean isAdmin(GeneralRequestHeaderDTO generalRequestHeaderDto) {
+        return generalRequestHeaderDto.getRole() == Roles.COMPANY_ADMIN;
     }
 
-    private GeneralRequestHeaderDto generalHeaderRequestConverter(String generalRequestHeader) {
+    private GeneralRequestHeaderDTO generalHeaderRequestConverter(String generalRequestHeader) {
         try {
-            GeneralRequestHeaderDto generalRequestHeaderDto = objectMapper.readValue(generalRequestHeader, GeneralRequestHeaderDto.class);
+            GeneralRequestHeaderDTO generalRequestHeaderDto = objectMapper.readValue(generalRequestHeader, GeneralRequestHeaderDTO.class);
             return generalRequestHeaderDto;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void authorizeUserToVehicle(String generalRequestHeader, AuthorizeUserToVehicleRequestDTO authorizeUserToVehicleRequestDTO) {
+        GeneralRequestHeaderDTO generalRequestHeaderDto = generalHeaderRequestConverter(generalRequestHeader);
+
+        if (!isAdmin(generalRequestHeaderDto))
+            throw new RuntimeException("User is not authorized to authorize user to vehicle");
+
+        ResponseEntity<UserResponseDTO> userResponseDTOResponseEntity = userServiceFeign.getUserById(authorizeUserToVehicleRequestDTO.getUserId());
+
+        if (userResponseDTOResponseEntity.getStatusCode().isError())
+            throw new RuntimeException("User not found");
+
+        Set<VehicleResponseDTO> vehiclesListByUser = groupServiceFeign.getVehiclesListByUserId(generalRequestHeader, authorizeUserToVehicleRequestDTO.getUserId());
+
+        if (vehiclesListByUser.stream()
+                .anyMatch(vehicleResponseDTO -> vehicleResponseDTO.getId() == authorizeUserToVehicleRequestDTO.getVehicleId()))
+            throw new RuntimeException("User is already authorized to this vehicle");
+
+        User user = userMapper.toEntity(userResponseDTOResponseEntity.getBody());
+
+        Optional<Vehicle> vehicleOptional = vehicleServiceHelper.getVehicleByIdAndCompanyId(authorizeUserToVehicleRequestDTO.getVehicleId(), generalRequestHeaderDto.getCompanyId());
+
+        if (vehicleOptional.isPresent()) {
+            Vehicle vehicle = vehicleOptional.get();
+            vehicleServiceHelper.saveUserVehicleAuth(vehicle, user);
+
+        } else
+            throw new RuntimeException("Vehicle not found");
+
+    }
+
+    public List<VehicleResponseDTO> getAllVehiclesByGroupId(String generalRequestHeader, long groupId) {
+        GeneralRequestHeaderDTO generalRequestHeaderDto = generalHeaderRequestConverter(generalRequestHeader);
+
+        if (isUserAuthorizedToGroup(generalRequestHeader, groupId))
+            return vehicleServiceHelper.getAllVehiclesByCompanyIdAndGroupId(generalRequestHeaderDto.getCompanyId(), groupId).stream()
+                    .map(vehicleMapper::toDto).collect(Collectors.toList());
+        else
+            throw new RuntimeException("User is not authorized to get vehicles for this group");
+
+    }
+
+    private boolean isUserAuthorizedToGroup(String generalRequestHeader, long groupId) {
+        Set<GroupDTO> userGroups = groupServiceFeign.getGroupListByUser(generalRequestHeader);
+        return userGroups.stream().anyMatch(groupDTO -> groupDTO.getId() == groupId);
+    }
+
+    public List<VehicleResponseDTO> getDirectlyAuthorizedVehicle(String generalRequestHeader) {
+        GeneralRequestHeaderDTO generalRequestHeaderDto = generalHeaderRequestConverter(generalRequestHeader);
+
+        return vehicleServiceHelper.getDirectlyAuthorizedVehicles(generalRequestHeaderDto.getUserId()).stream()
+                .map(userVehicleAuthorization -> vehicleMapper.toDto(userVehicleAuthorization.getVehicle())).collect(Collectors.toList());
+    }
+
+    public List<VehicleResponseDTO> getDirectlyAuthorizedVehicle(String generalRequestHeader, long userId) {
+        GeneralRequestHeaderDTO generalRequestHeaderDto = generalHeaderRequestConverter(generalRequestHeader);
+
+        if (!isAdmin(generalRequestHeaderDto))
+            throw new RuntimeException("Only admin can get directly authorized vehicles for other user");
+
+        return vehicleServiceHelper.getDirectlyAuthorizedVehicles(userId).stream()
+                .map(userVehicleAuthorization -> vehicleMapper.toDto(userVehicleAuthorization.getVehicle())).collect(Collectors.toList());
+    }
+
+    public VehicleResponseDTO updateVehicleGroup(String generalRequestHeader, VehicleGroupUpdateDTO vehicleGroupUpdateDTO) {
+        Optional<Vehicle> existingVehicle = vehicleServiceHelper.getVehicleByIdAndCompanyId(vehicleGroupUpdateDTO.getId(), generalHeaderRequestConverter(generalRequestHeader).getCompanyId());
+
+        existingVehicle.ifPresent(v -> v.setGroup(Group.builder().id(vehicleGroupUpdateDTO.getGroupId()).build()));
+
+        VehicleUpdateDTO vehicleUpdateDTO = vehicleMapper.toUpdateDto(existingVehicle.get());
+
+        return updateVehicle(generalRequestHeader, vehicleUpdateDTO);
     }
 }

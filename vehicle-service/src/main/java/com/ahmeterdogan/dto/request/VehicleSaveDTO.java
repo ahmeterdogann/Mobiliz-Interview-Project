@@ -14,5 +14,5 @@ public class VehicleSaveDTO {
     private int modelYear;
     private String chassisNumber;
     private String label;
-    private String groupName;
+    private Long groupId;
 }

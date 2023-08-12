@@ -9,13 +9,13 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class GeneralRequestHeaderDto {
+public class GeneralRequestHeaderDTO {
     private Long userId;
     private String name;
     private String surname;
     private Long companyId;
     private String companyName;
-    private Roles roles;
+    private Roles role;
 
     @Override
     public String toString() {

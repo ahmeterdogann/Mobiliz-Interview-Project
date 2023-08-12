@@ -1,4 +1,4 @@
-package com.ahmeterdogan.dto;
+package com.ahmeterdogan.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

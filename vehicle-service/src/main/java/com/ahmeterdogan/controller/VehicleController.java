@@ -1,5 +1,7 @@
 package com.ahmeterdogan.controller;
 
+import com.ahmeterdogan.dto.request.AuthorizeUserToVehicleRequestDTO;
+import com.ahmeterdogan.dto.request.VehicleGroupUpdateDTO;
 import com.ahmeterdogan.dto.response.VehicleResponseDTO;
 import com.ahmeterdogan.dto.request.VehicleUpdateDTO;
 import com.ahmeterdogan.dto.request.VehicleSaveDTO;
@@ -34,6 +36,11 @@ public class VehicleController {
         return ResponseEntity.ok(vehicleResponseDTOList);
     }
 
+    @GetMapping("/get-vehicles-by-group-id/{groupId}")
+    List<VehicleResponseDTO> getAllVehiclesByGroupId(@RequestHeader("X-User") String generalRequestHeader, @PathVariable("groupId") long groupId) {
+        return vehicleService.getAllVehiclesByGroupId(generalRequestHeader, groupId);
+    }
+
     @GetMapping("/all-for-company-admin")
     public ResponseEntity<List<VehicleResponseDTO>> getAllVehiclesForCompanyAdmin(@RequestHeader("X-User") String generalRequestHeader) {
         List<VehicleResponseDTO> vehicles = vehicleService.getAllVehicles(generalRequestHeader);
@@ -50,6 +57,17 @@ public class VehicleController {
         return vehicleService.getVehicleById(generalRequestHeader, vehicleId).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/get-directly-authorized-vehicle")
+    public ResponseEntity<List<VehicleResponseDTO>> getDirectlyAuthorizedVehicle(@RequestHeader("X-User") String generalRequestHeader) {
+        return ResponseEntity.ok(vehicleService.getDirectlyAuthorizedVehicle(generalRequestHeader));
+    }
+
+    @PostMapping("/authorize-user-to-vehicle")
+    public ResponseEntity authorizeUserToVehicle(@RequestHeader("X-User") String generalRequestHeader, @RequestBody AuthorizeUserToVehicleRequestDTO authorizeUserToVehicleRequestDTO) {
+        vehicleService.authorizeUserToVehicle(generalRequestHeader, authorizeUserToVehicleRequestDTO);
+        return ResponseEntity.ok().build();
+    }
+
     @PutMapping("/{id}/update")
     public ResponseEntity<VehicleResponseDTO> updateVehicle(@RequestHeader("X-User") String generalRequestHeader, @RequestBody VehicleUpdateDTO vehicleUpdateDTO) {
         return ResponseEntity.ok(vehicleService.updateVehicle(generalRequestHeader, vehicleUpdateDTO));
@@ -60,6 +78,14 @@ public class VehicleController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(vehicleService.deleteVehicleByIdAndCompanyId(generalRequestHeader,id));
     }
 
+    @GetMapping("/get-directly-authorized-vehicles-by-user-id")
+    List<VehicleResponseDTO> getDirectlyAuthorizedVehicle(@RequestHeader("X-User") String generalRequestHeader, @RequestParam Long userId) {
+        return vehicleService.getDirectlyAuthorizedVehicle(generalRequestHeader, userId);
+    }
 
+    @PutMapping("/update-vehicle-group")
+    public ResponseEntity<VehicleResponseDTO> updateVehicleGroup(@RequestHeader("X-User") String generalRequestHeader, @RequestBody VehicleGroupUpdateDTO vehicleGroupUpdateDTO) {
+        return ResponseEntity.ok(vehicleService.updateVehicleGroup(generalRequestHeader, vehicleGroupUpdateDTO));
+    }
 }
 
