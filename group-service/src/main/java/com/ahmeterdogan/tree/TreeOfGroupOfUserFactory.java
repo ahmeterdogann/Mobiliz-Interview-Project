@@ -17,8 +17,4 @@ public class TreeOfGroupOfUserFactory {
         return treeOfGroupOfUser;
     }
 
-    public TreeOfGroupOfUser createTreeOfGroupOfUser() {
-        TreeOfGroupOfUser treeOfGroupOfUser = applicationContext.getBean(TreeOfGroupOfUser.class);
-        return treeOfGroupOfUser;
-    }
 }

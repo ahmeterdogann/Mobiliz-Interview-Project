@@ -9,12 +9,16 @@ import com.ahmeterdogan.dto.request.UserSaveDTO;
 import com.ahmeterdogan.dto.response.GeneralRequestHeaderDTO;
 import com.ahmeterdogan.dto.response.UserRegisterResponseDTO;
 import com.ahmeterdogan.dto.response.UserResponseDTO;
+import com.ahmeterdogan.exception.AuthServiceException;
 import com.ahmeterdogan.feign.IUserServiceFeign;
 import com.ahmeterdogan.mapper.IAuthMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.ahmeterdogan.exception.ApiErrorMessages;
+
+import static com.ahmeterdogan.exception.ApiErrorMessages.*;
 
 import java.util.Optional;
 
@@ -50,7 +54,7 @@ public class AuthService {
             }
         }
         else {
-            throw new RuntimeException("User not found");
+            throw new AuthServiceException(ApiErrorMessages.USER_NOT_FOUND);
         }
 
         return generalRequestHeaderDTO;
@@ -62,10 +66,10 @@ public class AuthService {
         GeneralRequestHeaderDTO generalRequestHeaderDTO = generalHeaderRequestConverter(generalRequestHeader);
 
         if (!isAdmin(generalRequestHeaderDTO))
-            throw new RuntimeException("You are not authorized to register user");
+            throw new AuthServiceException(REGISTER_NOT_ALLOWED);
 
         if (!userRegisterRequestDto.getCompanyName().equals(generalRequestHeaderDTO.getCompanyName()))
-            throw new RuntimeException("You are not authorized to register user for this company");
+            throw new AuthServiceException(COMPANY_NAME_NOT_MATCH);
 
 
          UserResponseDTO userResponseDTO = userServiceFeign.save(UserSaveDTO.builder()

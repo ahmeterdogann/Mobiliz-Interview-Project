@@ -11,34 +11,42 @@ import com.ahmeterdogan.dto.request.GeneralRequestHeaderDTO;
 import com.ahmeterdogan.dto.response.GroupVehicleTreeResponseDTO;
 import com.ahmeterdogan.dto.response.VehicleResponseDTO;
 import com.ahmeterdogan.dto.request.GroupSaveDTO;
+import com.ahmeterdogan.exception.GroupServiceException;
+import com.ahmeterdogan.feign.IUserServiceFeign;
 import com.ahmeterdogan.feign.IVehicleServiceFeign;
 import com.ahmeterdogan.mapper.IGroupMapper;
+import com.ahmeterdogan.mapper.IUserMapper;
 import com.ahmeterdogan.tree.TreeOfGroupOfUser;
 import com.ahmeterdogan.tree.TreeOfGroupOfUserFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.ahmeterdogan.exception.ApiErrorMessages.*;
 
 @Service
 public class GroupService {
     private final GroupServiceHelper groupServiceHelper;
     private final TreeOfGroupOfUserFactory treeOfGroupOfUserFactory;
     private final IVehicleServiceFeign vehicleServiceFeign;
+    private final IUserServiceFeign userServiceFeign;
     private final ObjectMapper objectMapper;
     private final IGroupMapper groupMapper;
+    private final IUserMapper userMapper;
 
-    public GroupService(GroupServiceHelper groupServiceHelper, TreeOfGroupOfUserFactory treeOfGroupOfUserFactory, IVehicleServiceFeign vehicleServiceFeign, ObjectMapper objectMapper, IGroupMapper groupMapper) {
+    public GroupService(GroupServiceHelper groupServiceHelper, TreeOfGroupOfUserFactory treeOfGroupOfUserFactory, IVehicleServiceFeign vehicleServiceFeign, IUserServiceFeign userServiceFeign, ObjectMapper objectMapper, IGroupMapper groupMapper, IUserMapper userMapper) {
         this.groupServiceHelper = groupServiceHelper;
         this.treeOfGroupOfUserFactory = treeOfGroupOfUserFactory;
         this.vehicleServiceFeign = vehicleServiceFeign;
+        this.userServiceFeign = userServiceFeign;
         this.objectMapper = objectMapper;
         this.groupMapper = groupMapper;
+        this.userMapper = userMapper;
     }
 
     public GroupResponseDTO saveGroup(String generalRequestHeader, GroupSaveDTO groupSaveDTO) {
@@ -46,7 +54,7 @@ public class GroupService {
 
         if (groupSaveDTO.isRoot()) {
             if (!isAdmin(generalRequestHeaderDto))
-                throw new RuntimeException("You are not authorized to create root group");
+                throw new GroupServiceException(CREATE_ROOT_GROUP_NOT_ALLOWED);
 
             groupSaveDTO.setParentId(null);
 
@@ -56,7 +64,7 @@ public class GroupService {
                     .collect(Collectors.toSet());
 
             if (groupResponseDTOSet.stream().anyMatch(groupDto -> groupDto.getName().equals(groupSaveDTO.getName())))
-                throw new RuntimeException("Root group with this name already exists");
+                throw new GroupServiceException(GROUP_WITH_THIS_NAME_ALREADY_EXISTS);
 
             Group group = groupMapper.toEntity(groupSaveDTO);
             GroupResponseDTO savedRootGroup = groupMapper.toDto(groupServiceHelper.saveGroup(group));
@@ -67,7 +75,7 @@ public class GroupService {
         } else {
             GroupResponseDTO parentGroup = groupServiceHelper.getGroupByIdAndCompanyId(groupSaveDTO.getParentId(), generalRequestHeaderDto.getCompanyId())
                     .map(groupMapper::toDto)
-                    .orElseThrow(() -> new RuntimeException("Parent group not found"));
+                    .orElseThrow(() -> new GroupServiceException(PARENT_GROUP_NOT_FOUND));
 
             Set<GroupResponseDTO> groupResponseDTOSet = groupServiceHelper.getChildren(groupMapper.toEntity(parentGroup))
                     .stream()
@@ -75,10 +83,10 @@ public class GroupService {
                     .collect(Collectors.toSet());
 
             if (groupResponseDTOSet.stream().anyMatch(groupDto -> groupDto.getName().equals(groupSaveDTO.getName())))
-                throw new RuntimeException("Group with this name already exists under this group");
+                throw new GroupServiceException(GROUP_WITH_THIS_NAME_ALREADY_EXISTS);
 
             if (isUserAuthorizedParentGroup(generalRequestHeader, parentGroup))
-                throw new RuntimeException("You are not authorized to create group under this group");
+                throw new GroupServiceException(USER_NOT_AUTHORIZED_PARENT_GROUP);
 
             GroupResponseDTO savedChildGroup = groupMapper.toDto(groupServiceHelper.saveGroup(groupMapper.toEntity(groupSaveDTO)));
 
@@ -106,7 +114,7 @@ public class GroupService {
         GeneralRequestHeaderDTO generalRequestHeaderDTO = generalHeaderRequestConverter(generalRequestHeader);
 
         if (generalRequestHeaderDTO.getRole() != Roles.COMPANY_ADMIN)
-            throw new RuntimeException("Only company admin can see other users vehicle list");
+            throw new GroupServiceException(USER_NOT_COMPANY_ADMIN);
 
         TreeOfGroupOfUser treeOfGroupOfUser = treeOfGroupOfUserFactory.createTreeOfGroupOfUser(generalRequestHeader);
 
@@ -174,16 +182,16 @@ public class GroupService {
         GeneralRequestHeaderDTO generalRequestHeaderDto = generalHeaderRequestConverter(generalRequestHeader);
 
         if (!isAdmin(generalRequestHeaderDto))
-            throw new RuntimeException("You are not authorized to delete group");
+            throw new GroupServiceException(USER_NOT_COMPANY_ADMIN);
 
         Group group = groupServiceHelper.getGroupByIdAndCompanyId(id, generalRequestHeaderDto.getCompanyId())
-                .orElseThrow(() -> new RuntimeException("Group not found"));
+                .orElseThrow(() -> new GroupServiceException(GROUP_NOT_FOUND));
 
         if (group.isRoot())
-            throw new RuntimeException("You can not delete root group");
+            throw new GroupServiceException(CANNOT_DELETE_ROOT_GROUP);
         else {
             Group parent = groupServiceHelper.getParent(group)
-                    .orElseThrow(() -> new RuntimeException("Parent group not found"));
+                    .orElseThrow(() -> new GroupServiceException(PARENT_GROUP_NOT_FOUND));
 
             Set<Group> children = groupServiceHelper.getChildren(group);
             updateVehiclesByParentId(generalRequestHeader, parent, group);
@@ -209,5 +217,36 @@ public class GroupService {
 
         vehicleGroupUpdateDTOList.stream()
                 .forEach(vehicleGroupUpdateDTO -> vehicleServiceFeign.updateVehicleGroup(generalRequestHeader, vehicleGroupUpdateDTO));
+    }
+
+    public void authorizeUserToGroup(String generalRequestHeader, Long userId, Long groupId) {
+        GeneralRequestHeaderDTO generalRequestHeaderDto = generalHeaderRequestConverter(generalRequestHeader);
+
+        if (!isAdmin(generalRequestHeaderDto))
+            throw new GroupServiceException(USER_NOT_COMPANY_ADMIN);
+
+        User user = userServiceFeign.getUserById(userId)
+                .map(userMapper::toEntity)
+                .orElseThrow(() -> new GroupServiceException(USER_NOT_FOUND));
+
+        Group group = groupServiceHelper.getGroupByIdAndCompanyId(groupId, generalRequestHeaderDto.getCompanyId())
+                .orElseThrow(() -> new GroupServiceException(GROUP_NOT_FOUND));
+
+        TreeOfGroupOfUser treeOfGroupOfUser = treeOfGroupOfUserFactory.createTreeOfGroupOfUser(generalRequestHeader);
+
+        treeOfGroupOfUser.getListOfGroupOfUser(userId)
+                .stream()
+                .filter(groupDto -> groupDto.getId().equals(groupId))
+                .findFirst()
+                .ifPresent(groupDto -> {
+                    throw new GroupServiceException(USER_ALREADY_AUTHORIZED_TO_GROUP);
+                });
+
+        UserGroupAuthorization userGroupAuthorization = UserGroupAuthorization.builder()
+                .user(user)
+                .group(group)
+                .build();
+
+        groupServiceHelper.saveUserGroupAuth(userGroupAuthorization);
     }
 }

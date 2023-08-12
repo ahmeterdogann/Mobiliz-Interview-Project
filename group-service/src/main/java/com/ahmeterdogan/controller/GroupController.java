@@ -6,7 +6,6 @@ import com.ahmeterdogan.dto.response.VehicleResponseDTO;
 import com.ahmeterdogan.dto.request.GroupSaveDTO;
 import com.ahmeterdogan.service.GroupService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -51,6 +50,12 @@ public class GroupController {
     @GetMapping("/{id}")
     public ResponseEntity<GroupResponseDTO> getGroupById(@RequestHeader("X-User") String generalRequestHeader, @PathVariable("id") long id) {
         return groupService.getGroupByIdAndCompanyId(generalRequestHeader, id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/authorize-user-to-group")
+    public ResponseEntity authorizeUserToGroup(@RequestHeader("X-User") String generalRequestHeader, @RequestParam("userId") Long userId, @RequestParam("groupId") Long groupId) {
+        groupService.authorizeUserToGroup(generalRequestHeader, userId, groupId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @DeleteMapping("/{id}/delete")
