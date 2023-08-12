@@ -1,10 +1,14 @@
 package com.ahmeterdogan.data.dal;
 
 import com.ahmeterdogan.data.entity.Group;
+import com.ahmeterdogan.data.entity.GroupToGroup;
+import com.ahmeterdogan.data.entity.UserGroupAuthorization;
 import com.ahmeterdogan.data.repository.IGroupRepository;
 import com.ahmeterdogan.data.repository.IGroupToGroupRepository;
 import com.ahmeterdogan.data.repository.IUserGroupAuthRepository;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 import java.util.Set;
 
 @Component
@@ -20,8 +24,25 @@ public class GroupServiceHelper {
     }
 
 
-    public Group getParent(Group group) {
-        return groupToGroupRepository.findParent(group.getId());
+    public Group saveGroup(Group group) {
+        return groupRepository.save(group);
+    }
+
+    public void saveUserGroupAuth(UserGroupAuthorization userGroupAuthorization) {
+        userGroupAuthRepository.save(userGroupAuthorization);
+    }
+
+    public Optional<Group> getGroupByIdAndCompanyId(long groupId, long companyId) {
+        return groupRepository.findByIdAndCompany_Id(groupId, companyId);
+    }
+
+    public void saveGroupToGroup(Group parentGroup, Group childGroup) {
+        GroupToGroup groupToGroup = GroupToGroup.builder()
+                        .parentGroup(parentGroup)
+                        .childGroup(childGroup)
+                        .build();
+
+        groupToGroupRepository.save(groupToGroup);
     }
 
     public Set<Group> getChildren(Group group) {
@@ -32,25 +53,7 @@ public class GroupServiceHelper {
         return userGroupAuthRepository.findAllGroupsByUser(userId);
     }
 
-
-
-//    public List<GroupVehicleDTO> getAllVehiclesOfUserByGrouping(User user) {
-//        List<Group> userGroups =  userGroupAuthRepository.findAllGroupsByUser(user.getId());
-//        return buildTree(userGroups);
-//    }
-
-//    private List<GroupTreeNode> buildTree(List<Group> groups) {
-//        List<GroupTreeNode> tree = new ArrayList<>();
-//
-//        for (Group group : groups) {
-//            if (group.isRoot()) {
-//                tree.add(new GroupTreeNode(group.getId(), group.getName()));
-//                List<Group>
-//            }
-//            else {
-//                Group parent = getParent(group);
-//            }
-//
-//        }
-//    }
+    public Set<Group> findRootGroupsByCompanyId(Long companyId) {
+        return groupRepository.findAllByCompany_IdAndAndRootIsTrue(companyId);
+    }
 }

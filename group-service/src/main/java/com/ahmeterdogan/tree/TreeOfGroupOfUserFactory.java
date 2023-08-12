@@ -1,4 +1,4 @@
-package com.ahmeterdogan.util;
+package com.ahmeterdogan.tree;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;

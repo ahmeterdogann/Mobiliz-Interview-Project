@@ -23,7 +23,7 @@ public class Group {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
     @Column(name = "root", nullable = false)
-    private boolean isRoot;
+    private boolean root;
 
     @Override
     public boolean equals(Object o) {

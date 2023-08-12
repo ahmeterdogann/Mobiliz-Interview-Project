@@ -1,4 +1,4 @@
-package com.ahmeterdogan.dto;
+package com.ahmeterdogan.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,18 +9,18 @@ import java.util.Objects;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GroupDto {
+public class GroupResponseDTO {
     private Long id;
     private String name;
     private Long companyId;
-    private boolean isRoot;
+    private boolean root;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        GroupDto groupDto = (GroupDto) o;
-        return Objects.equals(id, groupDto.id);
+        GroupResponseDTO groupResponseDTO = (GroupResponseDTO) o;
+        return Objects.equals(id, groupResponseDTO.id);
     }
 
     @Override

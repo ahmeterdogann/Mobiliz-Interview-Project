@@ -1,15 +1,20 @@
 package com.ahmeterdogan.mapper;
 
 import com.ahmeterdogan.data.entity.Group;
-import com.ahmeterdogan.dto.GroupDto;
+import com.ahmeterdogan.dto.response.GroupResponseDTO;
+import com.ahmeterdogan.dto.request.GroupSaveDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring")
+@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, implementationName = "GroupMapperImpl", componentModel = "spring")
 public interface IGroupMapper {
     @Mapping(target = "companyId", source = "company.id")
-    GroupDto toDto(Group group);
+    GroupResponseDTO toDto(Group group);
 
     @Mapping(target = "company.id", source = "companyId")
-    Group toEntity(GroupDto groupDto);
+    Group toEntity(GroupResponseDTO groupResponseDTO);
+
+    @Mapping(target = "company.id", source = "companyId")
+    Group toEntity(GroupSaveDTO groupSaveDTO);
 }
