@@ -12,4 +12,6 @@ public interface IGroupRepository extends JpaRepository<Group, Long> {
     Optional<Group> findByIdAndCompany_Id(Long groupId, Long companyId);
 
     Set<Group> findAllByCompany_IdAndAndRootIsTrue(Long companyId);
+
+    void deleteByIdAndCompany_Id(Long id, Long companyId);
 }

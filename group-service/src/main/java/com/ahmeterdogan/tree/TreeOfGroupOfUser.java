@@ -3,8 +3,8 @@ package com.ahmeterdogan.tree;
 import com.ahmeterdogan.data.dal.GroupServiceHelper;
 import com.ahmeterdogan.dto.response.GroupResponseDTO;
 import com.ahmeterdogan.dto.GroupTreeDto;
-import com.ahmeterdogan.dto.GroupVehicleTreeDTO;
-import com.ahmeterdogan.dto.VehicleDTO;
+import com.ahmeterdogan.dto.response.GroupVehicleTreeResponseDTO;
+import com.ahmeterdogan.dto.response.VehicleResponseDTO;
 import com.ahmeterdogan.feign.IVehicleServiceFeign;
 import com.ahmeterdogan.mapper.IGroupMapper;
 import org.springframework.context.annotation.Scope;
@@ -21,8 +21,9 @@ public class TreeOfGroupOfUser {
     private final GroupServiceHelper groupServiceHelper;
     private final IVehicleServiceFeign vehicleServiceFeign;
     private final IGroupMapper groupMapper;
-    private final Set<VehicleDTO> allVehiclesInTree = new HashSet<>();
+    private final Set<VehicleResponseDTO> allVehiclesInTree = new HashSet<>();
     private final Set<GroupResponseDTO> allGroupsInTree = new HashSet<>();
+    private String generalRequestHeader;
 
     public TreeOfGroupOfUser(GroupServiceHelper groupServiceHelper, IVehicleServiceFeign vehicleServiceFeign, IGroupMapper groupMapper) {
         this.groupServiceHelper = groupServiceHelper;
@@ -38,9 +39,9 @@ public class TreeOfGroupOfUser {
         return groupServiceHelper.getUserGroupAuth(userId).stream().map(groupMapper::toDto).collect(Collectors.toSet());
     }
 
-    public Set<GroupVehicleTreeDTO> buildTreeOfGroupOfUserWithVehicle(long userId) {
+    public Set<GroupVehicleTreeResponseDTO> buildTreeOfGroupOfUserWithVehicle(long userId) {
         Set<GroupResponseDTO> groups = getUserGroupAuth(userId);
-        Set<GroupVehicleTreeDTO> trees = new HashSet<>();
+        Set<GroupVehicleTreeResponseDTO> trees = new HashSet<>();
 
         for (GroupResponseDTO group : groups) {
             allGroupsInTree.add(group);
@@ -62,20 +63,20 @@ public class TreeOfGroupOfUser {
         return trees;
     }
 
-    private GroupVehicleTreeDTO convertToGroupVehicleDTO(GroupResponseDTO groupResponseDTO) {
-        GroupVehicleTreeDTO groupVehicleTreeDTO = new GroupVehicleTreeDTO(groupResponseDTO.getId(), groupResponseDTO.getName());
+    private GroupVehicleTreeResponseDTO convertToGroupVehicleDTO(GroupResponseDTO groupResponseDTO) {
+        GroupVehicleTreeResponseDTO groupVehicleTreeResponseDTO = new GroupVehicleTreeResponseDTO(groupResponseDTO.getId(), groupResponseDTO.getName());
 
         Set<GroupResponseDTO> childrenGroups = getChildren(groupResponseDTO);
         for (GroupResponseDTO childGroup : childrenGroups) {
             allGroupsInTree.add(childGroup);
-            GroupVehicleTreeDTO childDto = convertToGroupVehicleDTO(childGroup);
-            groupVehicleTreeDTO.addChild(childDto);
+            GroupVehicleTreeResponseDTO childDto = convertToGroupVehicleDTO(childGroup);
+            groupVehicleTreeResponseDTO.addChild(childDto);
         }
 
-        List<VehicleDTO> vehicles = vehicleServiceFeign.getAllVehiclesByGroupId(groupResponseDTO.getId()).getBody();
-        groupVehicleTreeDTO.setVehiclesOfGroup(vehicles);
+        List<VehicleResponseDTO> vehicles = vehicleServiceFeign.getAllVehiclesByGroupId(generalRequestHeader, groupResponseDTO.getId());
+        groupVehicleTreeResponseDTO.setVehiclesOfGroup(vehicles);
         allVehiclesInTree.addAll(vehicles);
-        return groupVehicleTreeDTO;
+        return groupVehicleTreeResponseDTO;
     }
 
     private GroupTreeDto convertToGroupDto(GroupResponseDTO groupResponseDTO) {
@@ -92,13 +93,32 @@ public class TreeOfGroupOfUser {
     }
 
 
-    public Set<VehicleDTO> getListOfVehiclesOfUser(long userId) {
+    public Set<VehicleResponseDTO> getListOfVehiclesOfUser(long userId) {
         buildTreeOfGroupOfUserWithVehicle(userId);
-        return allVehiclesInTree;
+        Set<VehicleResponseDTO> allVehiclesOfUser = new HashSet<>(allVehiclesInTree);
+
+        List<VehicleResponseDTO> directlyAuthorizedVehicles = vehicleServiceFeign.getDirectlyAuthorizedVehicle(generalRequestHeader);
+        allVehiclesOfUser.addAll(directlyAuthorizedVehicles);
+
+        return allVehiclesOfUser;
+    }
+
+    public Set<VehicleResponseDTO> getListOfVehiclesOfUserForSpecificUser(long userId) {
+        buildTreeOfGroupOfUserWithVehicle(userId);
+        Set<VehicleResponseDTO> allVehiclesOfUser = new HashSet<>(allVehiclesInTree);
+
+        List<VehicleResponseDTO> directlyAuthorizedVehicles = vehicleServiceFeign.getDirectlyAuthorizedVehicle(generalRequestHeader, userId);
+        allVehiclesOfUser.addAll(directlyAuthorizedVehicles);
+
+        return allVehiclesOfUser;
     }
 
     public Set<GroupResponseDTO> getListOfGroupOfUser(long userId) {
         buildTreeOfGroupOfUser(userId);
         return allGroupsInTree;
+    }
+
+    public void setGeneralRequestHeader(String generalRequestHeader) {
+        this.generalRequestHeader = generalRequestHeader;
     }
 }

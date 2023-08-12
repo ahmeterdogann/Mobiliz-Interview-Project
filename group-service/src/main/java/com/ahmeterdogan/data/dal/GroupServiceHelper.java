@@ -3,6 +3,7 @@ package com.ahmeterdogan.data.dal;
 import com.ahmeterdogan.data.entity.Group;
 import com.ahmeterdogan.data.entity.GroupToGroup;
 import com.ahmeterdogan.data.entity.UserGroupAuthorization;
+import com.ahmeterdogan.data.entity.UserVehicleAuthorization;
 import com.ahmeterdogan.data.repository.IGroupRepository;
 import com.ahmeterdogan.data.repository.IGroupToGroupRepository;
 import com.ahmeterdogan.data.repository.IUserGroupAuthRepository;
@@ -38,9 +39,9 @@ public class GroupServiceHelper {
 
     public void saveGroupToGroup(Group parentGroup, Group childGroup) {
         GroupToGroup groupToGroup = GroupToGroup.builder()
-                        .parentGroup(parentGroup)
-                        .childGroup(childGroup)
-                        .build();
+                .parentGroup(parentGroup)
+                .childGroup(childGroup)
+                .build();
 
         groupToGroupRepository.save(groupToGroup);
     }
@@ -55,5 +56,25 @@ public class GroupServiceHelper {
 
     public Set<Group> findRootGroupsByCompanyId(Long companyId) {
         return groupRepository.findAllByCompany_IdAndAndRootIsTrue(companyId);
+    }
+
+    public Optional<Group> getParent(Group child) {
+        return groupToGroupRepository.findByChildGroup(child).map(GroupToGroup::getParentGroup);
+    }
+
+    public Integer deleteGroupToGroup(Group parent, Group group) {
+        return groupToGroupRepository.deleteByParentGroupAndChildGroup(parent, group);
+    }
+
+    public void deleteGroupToGroupByParentIdOrChildId(Group parent, Group group) {
+        groupToGroupRepository.deleteByParentGroup_IdOrChildGroup_Id(parent.getId(), group.getId());
+    }
+
+    public void deleteGroup(Group group) {
+        groupRepository.deleteByIdAndCompany_Id(group.getId(), group.getCompany().getId());
+    }
+
+    public void deleteUserGroupAuthByGroupId(long groupId) {
+        userGroupAuthRepository.deleteByGroup_Id(groupId);
     }
 }

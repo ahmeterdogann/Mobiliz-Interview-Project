@@ -1,11 +1,13 @@
 package com.ahmeterdogan.controller;
 
 import com.ahmeterdogan.dto.response.GroupResponseDTO;
-import com.ahmeterdogan.dto.GroupVehicleTreeDTO;
-import com.ahmeterdogan.dto.VehicleDTO;
+import com.ahmeterdogan.dto.response.GroupVehicleTreeResponseDTO;
+import com.ahmeterdogan.dto.response.VehicleResponseDTO;
 import com.ahmeterdogan.dto.request.GroupSaveDTO;
 import com.ahmeterdogan.service.GroupService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Set;
@@ -27,13 +29,18 @@ public class GroupController {
     }
 
     @GetMapping("/user-vehicles-tree")
-    public ResponseEntity<Set<GroupVehicleTreeDTO>> getTreeOfVehiclesOfUser(@RequestParam("userId") long userId) {
-        return ResponseEntity.ok(groupService.getTreeOfGroupUserWithVehicle(userId));
+    public ResponseEntity<Set<GroupVehicleTreeResponseDTO>> getTreeOfVehiclesOfUser(@RequestHeader("X-User") String generalRequestHeader) {
+        return ResponseEntity.ok(groupService.getTreeOfGroupUserWithVehicle(generalRequestHeader));
     }
 
     @GetMapping("/user-vehicles-list")
-    public ResponseEntity<Set<VehicleDTO>> getListOfVehiclesOfUser(@RequestParam long userId) {
-        return ResponseEntity.ok(groupService.getUserVehicleList(userId));
+    public ResponseEntity<Set<VehicleResponseDTO>> getListOfVehiclesOfUser(@RequestHeader("X-User") String generalRequestHeader) {
+        return ResponseEntity.ok(groupService.getUserVehicleList(generalRequestHeader));
+    }
+
+    @GetMapping("/user-vehicles-list-by-user-id")
+    public ResponseEntity<Set<VehicleResponseDTO>> getListOfVehiclesOfUser(@RequestHeader("X-User") String generalRequestHeader, @RequestParam Long userId) {
+        return ResponseEntity.ok(groupService.getUserVehicleList(generalRequestHeader, userId));
     }
 
     @GetMapping("/user-groups-list")
@@ -42,7 +49,13 @@ public class GroupController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GroupResponseDTO> getGroupById(@RequestHeader String generalRequestHeader, @PathVariable("id") long id) {
+    public ResponseEntity<GroupResponseDTO> getGroupById(@RequestHeader("X-User") String generalRequestHeader, @PathVariable("id") long id) {
         return groupService.getGroupByIdAndCompanyId(generalRequestHeader, id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}/delete")
+    public ResponseEntity deleteGroup(@RequestHeader("X-User") String generalRequestHeader, @PathVariable("id") long id) {
+        groupService.deleteGroupByIdAndCompanyId(generalRequestHeader,id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

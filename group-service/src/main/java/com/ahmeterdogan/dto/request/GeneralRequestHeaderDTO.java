@@ -16,7 +16,7 @@ public class GeneralRequestHeaderDTO {
     private String surname;
     private Long companyId;
     private String companyName;
-    private Roles roles;
+    private Roles role;
 
     @Override
     public String toString() {

@@ -11,7 +11,14 @@ public class TreeOfGroupOfUserFactory {
         this.applicationContext = applicationContext;
     }
 
+    public TreeOfGroupOfUser createTreeOfGroupOfUser(String generalRequestHeader) {
+        TreeOfGroupOfUser treeOfGroupOfUser = applicationContext.getBean(TreeOfGroupOfUser.class);
+        treeOfGroupOfUser.setGeneralRequestHeader(generalRequestHeader);
+        return treeOfGroupOfUser;
+    }
+
     public TreeOfGroupOfUser createTreeOfGroupOfUser() {
-        return applicationContext.getBean(TreeOfGroupOfUser.class);
+        TreeOfGroupOfUser treeOfGroupOfUser = applicationContext.getBean(TreeOfGroupOfUser.class);
+        return treeOfGroupOfUser;
     }
 }
