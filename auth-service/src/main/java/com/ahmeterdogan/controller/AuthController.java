@@ -1,7 +1,7 @@
 package com.ahmeterdogan.controller;
 
 import com.ahmeterdogan.dto.request.UserRegisterRequestDto;
-import com.ahmeterdogan.dto.response.UserAuthResponseDto;
+import com.ahmeterdogan.dto.response.GeneralRequestHeaderResponseDTO;
 import com.ahmeterdogan.dto.response.UserRegisterResponseDto;
 import com.ahmeterdogan.service.AuthService;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +17,8 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public ResponseEntity<UserAuthResponseDto> login(@RequestHeader("username") String username,
-                                                     @RequestHeader("password") String password) {
+    public ResponseEntity<GeneralRequestHeaderResponseDTO> login(@RequestHeader("username") String username,
+                                                                 @RequestHeader("password") String password) {
         return ResponseEntity.ok(authService.login(username, password));
     }
 

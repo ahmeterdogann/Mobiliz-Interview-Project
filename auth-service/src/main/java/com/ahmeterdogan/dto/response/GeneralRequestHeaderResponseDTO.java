@@ -7,8 +7,8 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserAuthResponseDto {
-    private Long id;
+public class GeneralRequestHeaderResponseDTO {
+    private Long userId;
     private String name;
     private String surname;
     private Long companyId;

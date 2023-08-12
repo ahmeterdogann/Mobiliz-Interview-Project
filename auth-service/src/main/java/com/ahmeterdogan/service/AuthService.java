@@ -6,14 +6,13 @@ import com.ahmeterdogan.data.entity.Company;
 import com.ahmeterdogan.data.entity.User;
 import com.ahmeterdogan.dto.request.UserRegisterRequestDto;
 import com.ahmeterdogan.dto.request.UserSaveDto;
-import com.ahmeterdogan.dto.response.UserAuthResponseDto;
+import com.ahmeterdogan.dto.response.GeneralRequestHeaderResponseDTO;
 import com.ahmeterdogan.dto.response.UserRegisterResponseDto;
 import com.ahmeterdogan.dto.response.UserResponseDto;
 import com.ahmeterdogan.feign.ICompanyServiceFeign;
 import com.ahmeterdogan.feign.IUserServiceFeign;
 import com.ahmeterdogan.mapper.IAuthMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
@@ -32,15 +31,15 @@ public class AuthService {
         this.authMapper = authMapper;
     }
 
-    public UserAuthResponseDto login(String username, String password) {
+    public GeneralRequestHeaderResponseDTO login(String username, String password) {
         Optional<AuthTable> optionalAuthTable = Optional.ofNullable(authServiceHelper.findByUsernameAndPassword(username, password));
-        UserAuthResponseDto userAuthResponseDto = new UserAuthResponseDto();
+        GeneralRequestHeaderResponseDTO generalRequestHeaderResponseDTO = new GeneralRequestHeaderResponseDTO();
         if (optionalAuthTable.isPresent()) {
             AuthTable authTable = optionalAuthTable.get();
             UserResponseDto userResponseDto = userServiceFeign.getUserById(authTable.getUser().getId()).orElse(null);
             if (userResponseDto != null) {
-                userAuthResponseDto = UserAuthResponseDto.builder()
-                        .id(userResponseDto.getId())
+                generalRequestHeaderResponseDTO = GeneralRequestHeaderResponseDTO.builder()
+                        .userId(userResponseDto.getId())
                         .name(userResponseDto.getName())
                         .surname(userResponseDto.getSurname())
                         .companyId(userResponseDto.getCompanyId())
@@ -53,7 +52,7 @@ public class AuthService {
             throw new RuntimeException("User not found");
         }
 
-        return userAuthResponseDto;
+        return generalRequestHeaderResponseDTO;
     }
 
     //Transaction çalışmıyor anlayamadım bir türlü sanırım başka bir mikroservis çağrısındaki ayrı bir transaction'ı rollback etmesini beklediğim için
