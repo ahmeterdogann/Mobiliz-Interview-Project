@@ -1,39 +1,30 @@
 package com.ahmeterdogan.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.Objects;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class GroupDTO {
-    private long id;
+    private Long id;
     private String name;
-    private GroupDTO parentGroup;
+    private Long companyId;
+    private boolean root;
 
-    public GroupDTO(long id, String name, GroupDTO parentGroup) {
-        this.id = id;
-        this.name = name;
-        this.parentGroup = parentGroup;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GroupDTO groupDto = (GroupDTO) o;
+        return Objects.equals(id, groupDto.id);
     }
 
-    public GroupDTO() {}
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public GroupDTO getParentGroup() {
-        return parentGroup;
-    }
-
-    public void setParentGroup(GroupDTO parentGroup) {
-        this.parentGroup = parentGroup;
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

@@ -1,4 +1,4 @@
-package com.ahmeterdogan.dto;
+package com.ahmeterdogan.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,7 +9,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class VehicleDTO {
+public class VehicleResponseDTO {
     private long id;
     private String plateNumber;
     private String brand;
@@ -21,7 +21,7 @@ public class VehicleDTO {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        VehicleDTO that = (VehicleDTO) o;
+        VehicleResponseDTO that = (VehicleResponseDTO) o;
         return id == that.id;
     }
 

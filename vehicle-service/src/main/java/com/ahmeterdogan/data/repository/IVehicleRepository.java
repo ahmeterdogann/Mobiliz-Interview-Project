@@ -9,15 +9,19 @@ import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface IVehicleRepository extends JpaRepository<Vehicle, Long> {
-    int deleteById(long id);
 
-    @Modifying
-    @Query("UPDATE Vehicle v SET v.plateNumber = :#{#vehicle.plateNumber}, v.brand = :#{#vehicle.brand}, v.model = :#{#vehicle.model}, v.modelYear = :#{#vehicle.modelYear}, v.chassisNumber = :#{#vehicle.chassisNumber}, v.label = :#{#vehicle.label}, v.group.id = :#{#vehicle.group.id} WHERE v.id = :#{#vehicle.id}")
-    Vehicle updateVehicle(@Param("vehicle") Vehicle vehicle);
+    List<Vehicle> findAllByCompany_Id(Long companyId);
 
-    List<Vehicle> findAllByGroup_Id(Long groupId);
+    List<Vehicle> findAllByCompany_IdAndGroup_Id(Long companyId, Long groupId);
+
+    Optional<Vehicle> findByCompany_Id(Long companyId);
+
+    Optional<Vehicle> findByIdAndCompany_Id(Long id, Long companyId);
+
+    int deleteByIdAndCompany_Id(Long id, Long companyId);
 }
 

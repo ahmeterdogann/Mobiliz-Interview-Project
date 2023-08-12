@@ -23,34 +23,22 @@ public class VehicleServiceHelper {
     }
 
     public Vehicle saveVehicle(Vehicle vehicle) {
-        return vehicleRepository.save(vehicle).builder().build();
+        return vehicleRepository.save(vehicle);
     }
 
-    public List<Vehicle> saveAll(List<Vehicle> vehicles) {
-        return vehicleRepository.saveAll(vehicles);
+    public Optional<Vehicle> getVehicleByIdAndCompanyId(Long id, Long companyId) {
+        return vehicleRepository.findByIdAndCompany_Id(id, companyId);
     }
 
-    public Optional<Vehicle> getVehicleById(long id) {
-        return vehicleRepository.findById(id);
+    public List<Vehicle> getAllVehicles(Long companyId) {
+        return vehicleRepository.findAllByCompany_Id(companyId);
     }
 
-    public List<Vehicle> getAllVehicles() {
-        return vehicleRepository.findAll();
+    public List<Vehicle> getAllVehiclesByCompanyIdAndGroupId(long companyId, long groupId) {
+        return vehicleRepository.findAllByCompany_IdAndGroup_Id(companyId, groupId);
     }
 
-    public Vehicle updateVehicleById(Vehicle vehicle) {
-        return vehicleRepository.updateVehicle(vehicle);
-    }
-
-    public int deleteVehicleById(long id) {
-        return vehicleRepository.deleteById(id);
-    }
-
-    public List<Vehicle> getAllVehiclesByGroupId(long groupId) {
-        return vehicleRepository.findAllByGroup_Id(groupId);
-    }
-
-    public UserVehicleAuthorization userVehicleAuthRecord(long userId, long vehicleId) {
-        return userVehicleAuthorizationRepository.findByUserIdAndVehicleId(userId, vehicleId);
+    public int deleteVehicleByIdAndCompanyId(long id, long companyId) {
+        return vehicleRepository.deleteByIdAndCompany_Id(id, companyId);
     }
 }
