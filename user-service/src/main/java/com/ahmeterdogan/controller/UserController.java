@@ -1,7 +1,7 @@
 package com.ahmeterdogan.controller;
 
 import com.ahmeterdogan.dto.request.UserSaveRequestDto;
-import com.ahmeterdogan.dto.response.UserResponseDto;
+import com.ahmeterdogan.dto.response.UserResponseDTO;
 import com.ahmeterdogan.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,12 +16,12 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDto> getUserById(@PathVariable long id) {
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable long id) {
         return userService.getUserById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/save")
-    public ResponseEntity<UserResponseDto> save(@RequestBody UserSaveRequestDto userSaveRequestDto) {
+    public ResponseEntity<UserResponseDTO> save(@RequestBody UserSaveRequestDto userSaveRequestDto) {
         return ResponseEntity.ok(userService.save(userSaveRequestDto));
     }
 }

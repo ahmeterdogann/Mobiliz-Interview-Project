@@ -1,9 +1,8 @@
 package com.ahmeterdogan.service;
 
 import com.ahmeterdogan.dto.request.UserSaveRequestDto;
-import com.ahmeterdogan.dto.response.UserResponseDto;
+import com.ahmeterdogan.dto.response.UserResponseDTO;
 import com.ahmeterdogan.mapper.IUserMapper;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import com.ahmeterdogan.data.dal.UserServiceHelper;
 
@@ -19,11 +18,11 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
-    public Optional<UserResponseDto> getUserById(long id) {
+    public Optional<UserResponseDTO> getUserById(long id) {
         return userServiceHelper.getUserById(id).map(userMapper::toDto);
     }
 
-    public UserResponseDto save(UserSaveRequestDto userSaveRequestDto) {
+    public UserResponseDTO save(UserSaveRequestDto userSaveRequestDto) {
          return userMapper.toDto(userServiceHelper.save(userMapper.toEntity(userSaveRequestDto)));
     }
 }
