@@ -9,5 +9,5 @@ import org.springframework.web.bind.annotation.RequestHeader;
 @FeignClient(url = "http://localhost:8084/api/v1/auth",name = "auth-service", configuration = FeignConfiguration.class)
 public interface IAuthServiceFeign {
     @GetMapping("/login")
-    public GeneralRequestHeaderDto login(@RequestHeader String username, @RequestHeader String password);
+    GeneralRequestHeaderDto login(@RequestHeader("username") String username, @RequestHeader("password") String password);
 }

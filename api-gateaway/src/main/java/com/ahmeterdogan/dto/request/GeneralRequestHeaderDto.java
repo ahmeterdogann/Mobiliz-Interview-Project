@@ -14,5 +14,5 @@ public class GeneralRequestHeaderDto {
     private String surname;
     private Long companyId;
     private String companyName;
-    private Roles roles;
+    private Roles role;
 }
