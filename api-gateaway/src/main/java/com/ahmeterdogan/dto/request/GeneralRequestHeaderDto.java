@@ -8,8 +8,8 @@ import lombok.*;
 @NoArgsConstructor
 @Getter
 @Setter
-public class UserAuthDTO {
-    private Long id;
+public class GeneralRequestHeaderDto {
+    private Long userId;
     private String name;
     private String surname;
     private Long companyId;

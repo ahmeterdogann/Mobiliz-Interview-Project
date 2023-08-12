@@ -1,18 +1,15 @@
-package com.ahmeterdogan;
+package com.ahmeterdogan.filter;
 
-import com.ahmeterdogan.dto.request.UserAuthDTO;
+import com.ahmeterdogan.dto.request.GeneralRequestHeaderDto;
 import com.ahmeterdogan.feign.IAuthServiceFeign;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
-
-import javax.ws.rs.core.SecurityContext;
 
 @Component
 public class AuthenticationFilter implements GlobalFilter {
@@ -26,9 +23,12 @@ public class AuthenticationFilter implements GlobalFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        UserAuthDTO authDTO = authServiceFeign.login("ahmeterdogann", "ahmet1903");
+        HttpHeaders headers = exchange.getRequest().getHeaders();
+        String username = headers.getFirst("username");
+        String password = headers.getFirst("password");
 
-        // JSON verisini dönüştürüp alıyoruz
+        GeneralRequestHeaderDto authDTO = authServiceFeign.login(username, password);
+
         String jsonAuthDTO = null;
         try {
             jsonAuthDTO = objectMapper.writeValueAsString(authDTO);
@@ -36,7 +36,6 @@ public class AuthenticationFilter implements GlobalFilter {
             throw new RuntimeException(e);
         }
 
-        // X-User başlığını değiştiriyoruz
         exchange.getRequest().mutate().header("X-User", jsonAuthDTO);
 
         return chain.filter(exchange);
