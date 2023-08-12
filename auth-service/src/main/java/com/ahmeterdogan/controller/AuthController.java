@@ -1,9 +1,10 @@
 package com.ahmeterdogan.controller;
 
 import com.ahmeterdogan.dto.request.UserRegisterRequestDto;
-import com.ahmeterdogan.dto.response.GeneralRequestHeaderResponseDTO;
-import com.ahmeterdogan.dto.response.UserRegisterResponseDto;
+import com.ahmeterdogan.dto.response.GeneralRequestHeaderDTO;
+import com.ahmeterdogan.dto.response.UserRegisterResponseDTO;
 import com.ahmeterdogan.service.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,13 +18,14 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public ResponseEntity<GeneralRequestHeaderResponseDTO> login(@RequestHeader("username") String username,
-                                                                 @RequestHeader("password") String password) {
+    public ResponseEntity<GeneralRequestHeaderDTO> login(@RequestHeader("username") String username,
+                                                         @RequestHeader("password") String password) {
         return ResponseEntity.ok(authService.login(username, password));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserRegisterResponseDto> register(@RequestBody UserRegisterRequestDto userRegisterRequestDto) {
-        return ResponseEntity.ok(authService.register(userRegisterRequestDto));
+    public ResponseEntity<UserRegisterResponseDTO> register(@RequestHeader("X-User") String generalRequestHeader,
+                                                            @RequestBody @Valid UserRegisterRequestDto userRegisterRequestDto) {
+        return ResponseEntity.ok(authService.register(generalRequestHeader, userRegisterRequestDto));
     }
 }

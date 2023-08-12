@@ -2,16 +2,17 @@ package com.ahmeterdogan.service;
 
 import com.ahmeterdogan.data.dal.AuthServiceHelper;
 import com.ahmeterdogan.data.entity.AuthTable;
-import com.ahmeterdogan.data.entity.Company;
 import com.ahmeterdogan.data.entity.User;
+import com.ahmeterdogan.data.enums.Roles;
 import com.ahmeterdogan.dto.request.UserRegisterRequestDto;
-import com.ahmeterdogan.dto.request.UserSaveDto;
-import com.ahmeterdogan.dto.response.GeneralRequestHeaderResponseDTO;
-import com.ahmeterdogan.dto.response.UserRegisterResponseDto;
-import com.ahmeterdogan.dto.response.UserResponseDto;
-import com.ahmeterdogan.feign.ICompanyServiceFeign;
+import com.ahmeterdogan.dto.request.UserSaveDTO;
+import com.ahmeterdogan.dto.response.GeneralRequestHeaderDTO;
+import com.ahmeterdogan.dto.response.UserRegisterResponseDTO;
+import com.ahmeterdogan.dto.response.UserResponseDTO;
 import com.ahmeterdogan.feign.IUserServiceFeign;
 import com.ahmeterdogan.mapper.IAuthMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,30 +22,30 @@ import java.util.Optional;
 public class AuthService {
     private final AuthServiceHelper authServiceHelper;
     private final IUserServiceFeign userServiceFeign;
-    private final ICompanyServiceFeign companyServiceFeign;
     private final IAuthMapper authMapper;
+    private final ObjectMapper objectMapper;
 
-    public AuthService(AuthServiceHelper authServiceHelper, IUserServiceFeign userServiceFeign, ICompanyServiceFeign companyServiceFeign, IAuthMapper authMapper) {
+    public AuthService(AuthServiceHelper authServiceHelper, IUserServiceFeign userServiceFeign, IAuthMapper authMapper, ObjectMapper objectMapper) {
         this.authServiceHelper = authServiceHelper;
         this.userServiceFeign = userServiceFeign;
-        this.companyServiceFeign = companyServiceFeign;
         this.authMapper = authMapper;
+        this.objectMapper = objectMapper;
     }
 
-    public GeneralRequestHeaderResponseDTO login(String username, String password) {
+    public GeneralRequestHeaderDTO login(String username, String password) {
         Optional<AuthTable> optionalAuthTable = Optional.ofNullable(authServiceHelper.findByUsernameAndPassword(username, password));
-        GeneralRequestHeaderResponseDTO generalRequestHeaderResponseDTO = new GeneralRequestHeaderResponseDTO();
+        GeneralRequestHeaderDTO generalRequestHeaderDTO = new GeneralRequestHeaderDTO();
         if (optionalAuthTable.isPresent()) {
             AuthTable authTable = optionalAuthTable.get();
-            UserResponseDto userResponseDto = userServiceFeign.getUserById(authTable.getUser().getId()).orElse(null);
+            UserResponseDTO userResponseDto = userServiceFeign.getUserById(authTable.getUser().getId()).orElse(null);
             if (userResponseDto != null) {
-                generalRequestHeaderResponseDTO = GeneralRequestHeaderResponseDTO.builder()
+                generalRequestHeaderDTO = GeneralRequestHeaderDTO.builder()
                         .userId(userResponseDto.getId())
                         .name(userResponseDto.getName())
                         .surname(userResponseDto.getSurname())
                         .companyId(userResponseDto.getCompanyId())
                         .companyName(userResponseDto.getCompanyName())
-                        .roles(authTable.getRole())
+                        .role(authTable.getRole())
                         .build();
             }
         }
@@ -52,32 +53,53 @@ public class AuthService {
             throw new RuntimeException("User not found");
         }
 
-        return generalRequestHeaderResponseDTO;
+        return generalRequestHeaderDTO;
     }
 
     //Transaction çalışmıyor anlayamadım bir türlü sanırım başka bir mikroservis çağrısındaki ayrı bir transaction'ı rollback etmesini beklediğim için
     @Transactional
-    public UserRegisterResponseDto register(UserRegisterRequestDto userRegisterRequestDto) {
-         Company company = companyServiceFeign.getCompanyByName(userRegisterRequestDto.getCompanyName());
-         UserResponseDto userResponseDto = userServiceFeign.save(UserSaveDto.builder()
+    public UserRegisterResponseDTO register(String generalRequestHeader, UserRegisterRequestDto userRegisterRequestDto) {
+        GeneralRequestHeaderDTO generalRequestHeaderDTO = generalHeaderRequestConverter(generalRequestHeader);
+
+        if (!isAdmin(generalRequestHeaderDTO))
+            throw new RuntimeException("You are not authorized to register user");
+
+        if (!userRegisterRequestDto.getCompanyName().equals(generalRequestHeaderDTO.getCompanyName()))
+            throw new RuntimeException("You are not authorized to register user for this company");
+
+
+         UserResponseDTO userResponseDTO = userServiceFeign.save(UserSaveDTO.builder()
                  .name(userRegisterRequestDto.getName())
                  .surname(userRegisterRequestDto.getSurname())
-                 .companyId(company.getId())
-                 .companyName(company.getName())
+                 .companyId(generalRequestHeaderDTO.getCompanyId())
+                 .companyName(generalRequestHeaderDTO.getCompanyName())
                  .build());
 
-         User user = authMapper.toUserEntity(userResponseDto);
+         User user = authMapper.toUserEntity(userResponseDTO);
          AuthTable authTable = authServiceHelper.save(userRegisterRequestDto.getUsername(), userRegisterRequestDto.getPassword(), user, userRegisterRequestDto.getRole());
 
-         return UserRegisterResponseDto.builder()
+         return UserRegisterResponseDTO.builder()
                  .userId(user.getId())
                  .username(user.getName())
                  .name(user.getName())
                  .surname(user.getSurname())
-                 .companyId(company.getId())
-                 .companyName(company.getName())
+                 .companyId(generalRequestHeaderDTO.getCompanyId())
+                 .companyName(generalRequestHeaderDTO.getCompanyName())
                  .roles(authTable.getRole())
                  .build();
 
+    }
+
+    private boolean isAdmin(GeneralRequestHeaderDTO generalRequestHeaderDto) {
+        return generalRequestHeaderDto.getRole() == Roles.COMPANY_ADMIN;
+    }
+
+    private GeneralRequestHeaderDTO generalHeaderRequestConverter(String generalRequestHeader) {
+        try {
+            GeneralRequestHeaderDTO generalRequestHeaderDto = objectMapper.readValue(generalRequestHeader, GeneralRequestHeaderDTO.class);
+            return generalRequestHeaderDto;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -1,21 +1,17 @@
 package com.ahmeterdogan.dto.response;
 
 import com.ahmeterdogan.data.enums.Roles;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserRegisterResponseDto {
-    private String username;
+public class GeneralRequestHeaderDTO {
     private Long userId;
     private String name;
     private String surname;
     private Long companyId;
     private String companyName;
-    private Roles roles;
+    private Roles role;
 }

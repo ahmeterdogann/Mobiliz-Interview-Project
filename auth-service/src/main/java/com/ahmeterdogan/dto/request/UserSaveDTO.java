@@ -6,7 +6,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserSaveDto {
+public class UserSaveDTO {
     public String name;
     public String surname;
     public long companyId;
