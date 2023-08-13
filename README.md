@@ -32,7 +32,7 @@ ağaç yapısında döndüren bir servis geliştirilmesi istenmiştir.
 
 Mikroservis mimarisi, projenin hedeflerini gerçekleştirmek için bir arada çalışan çeşitli bileşenleri içerir.
 
-**Kimlik Doğrulama :** Uygulamaya api-gateaway üzerinden yapılan istekler ilgili servise yönlendirilmeden önce auth-service'e
+**Kimlik Doğrulama :** Uygulamaya api-gateway üzerinden yapılan istekler ilgili servise yönlendirilmeden önce auth-service'e
 yönlendirilerek kimlik doğrulaması yapılır. Ardından aşağıdaki gibi bir formatta ilgili istek diğer servislere request header
 içerisinde yönlendirilir.
 
