@@ -95,7 +95,5 @@ public class VehicleController {
     public ResponseEntity<Integer> deleteVehicleById(@RequestHeader("X-User") String generalRequestHeader, @RequestParam("id") long id) {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(vehicleService.deleteVehicleByIdAndCompanyId(generalRequestHeader,id));
     }
-
-
 }
 
