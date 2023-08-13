@@ -4,10 +4,10 @@ import lombok.Getter;
 
 @Getter
 public class AuthServiceException extends RuntimeException{
-    private ApiErrorMessages apiErrorMessages;
+    private ApiError apiError;
 
-    public AuthServiceException(ApiErrorMessages apiErrorMessages) {
-        this.apiErrorMessages = apiErrorMessages;
+    public AuthServiceException(ApiError apiError) {
+        this.apiError = apiError;
     }
 
 }

@@ -8,8 +8,12 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import static com.ahmeterdogan.constants.ApiUrl.*;
+
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping(AUTH)
 public class AuthController {
     private final AuthService authService;
 
@@ -17,15 +21,22 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @GetMapping("/login")
+    @GetMapping(LOGIN)
     public ResponseEntity<GeneralRequestHeaderDTO> login(@RequestHeader("username") String username,
                                                          @RequestHeader("password") String password) {
         return ResponseEntity.ok(authService.login(username, password));
     }
 
-    @PostMapping("/register")
+    @PostMapping(REGISTER)
     public ResponseEntity<UserRegisterResponseDTO> register(@RequestHeader("X-User") String generalRequestHeader,
                                                             @RequestBody @Valid UserRegisterRequestDto userRegisterRequestDto) {
         return ResponseEntity.ok(authService.register(generalRequestHeader, userRegisterRequestDto));
+    }
+
+    @PostMapping(REGISTER_ALL)
+    public ResponseEntity<List<UserRegisterResponseDTO>> registerAll(@RequestHeader("X-User") String generalRequestHeader,
+                                                            @RequestBody @Valid List<UserRegisterRequestDto> userRegisterRequestDtoList) {
+        //int k = 7 / 0;
+        return ResponseEntity.ok(authService.registerAll(generalRequestHeader, userRegisterRequestDtoList));
     }
 }

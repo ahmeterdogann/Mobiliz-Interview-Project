@@ -15,11 +15,14 @@ import com.ahmeterdogan.mapper.IAuthMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import com.ahmeterdogan.exception.ApiErrorMessages;
+import com.ahmeterdogan.exception.ApiError;
 
-import static com.ahmeterdogan.exception.ApiErrorMessages.*;
+import static com.ahmeterdogan.exception.ApiError.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -54,14 +57,14 @@ public class AuthService {
             }
         }
         else {
-            throw new AuthServiceException(ApiErrorMessages.USER_NOT_FOUND);
+            throw new AuthServiceException(ApiError.USER_NOT_FOUND);
         }
 
         return generalRequestHeaderDTO;
     }
 
-    //Transaction çalışmıyor anlayamadım bir türlü sanırım başka bir mikroservis çağrısındaki ayrı bir transaction'ı rollback etmesini beklediğim için
-    @Transactional
+    //Transaction çalışmıyor anlayamadım bir türlü sanırım başka bir mikroservis çağrısındaki ayrı bir transaction'ı rollback etmesini beklediğim için olabilir
+    @Transactional(propagation = Propagation.REQUIRED)
     public UserRegisterResponseDTO register(String generalRequestHeader, UserRegisterRequestDto userRegisterRequestDto) {
         GeneralRequestHeaderDTO generalRequestHeaderDTO = generalHeaderRequestConverter(generalRequestHeader);
 
@@ -105,5 +108,15 @@ public class AuthService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public List<UserRegisterResponseDTO> registerAll(String generalRequestHeader, List<UserRegisterRequestDto> userRegisterRequestDtoList) {
+        List<UserRegisterResponseDTO> savedUsers = new ArrayList<>();
+
+        userRegisterRequestDtoList
+                .stream()
+                .forEach(u -> savedUsers.add(register(generalRequestHeader, u)));
+
+        return savedUsers;
     }
 }

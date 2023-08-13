@@ -5,6 +5,8 @@ import com.ahmeterdogan.data.entity.User;
 import com.ahmeterdogan.data.enums.Roles;
 import com.ahmeterdogan.data.repository.IUserAuthRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class AuthServiceHelper {
@@ -18,6 +20,7 @@ public class AuthServiceHelper {
         return userAuthRepository.findByUsernameAndPassword(username, password);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public AuthTable save(String username, String password, User user, Roles role) {
         AuthTable authTable = AuthTable.
                 builder().
