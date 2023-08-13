@@ -36,6 +36,8 @@ Mikroservis mimarisi, projenin hedeflerini gerçekleştirmek için bir arada ça
 yönlendirilerek kimlik doğrulaması yapılır. Ardından aşağıdaki gibi bir formatta ilgili istek diğer servislere request header
 içerisinde yönlendirilir.
 
+{ "userId":1547, "name":"Hüseyin", "surname":"Ateş", "companyId":5879, "companyName":"Mülakat A.Ş.", "role":"Admin"}
+
 **Controller :** Gelen HTTP isteklerini yönetir ve hizmet katmanıyla etkileşim kurar.
 
 **Service :** İş mantığını içerir, veritabanında işlemleri gerçekleştirir ve yetkilendirme kurallarını uygular.
