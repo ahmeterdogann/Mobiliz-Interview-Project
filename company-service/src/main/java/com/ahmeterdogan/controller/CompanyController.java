@@ -5,8 +5,10 @@ import com.ahmeterdogan.service.CompanyService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import static com.ahmeterdogan.constants.ApiUrl.*;
+
 @RestController
-@RequestMapping("/api/v1/companies")
+@RequestMapping(COMPANIES)
 public class CompanyController {
     private final CompanyService companyService;
 
@@ -14,7 +16,7 @@ public class CompanyController {
         this.companyService = companyService;
     }
 
-    @GetMapping("/find-by-name")
+    @GetMapping(FIND_BY_NAME)
     public ResponseEntity<Company> getCompanyByName(@RequestParam("companyName") String companyName) {
         return ResponseEntity.ok(companyService.getCompanyByName(companyName));
     }
