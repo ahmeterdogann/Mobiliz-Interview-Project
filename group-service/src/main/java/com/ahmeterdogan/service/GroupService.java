@@ -236,10 +236,6 @@ public class GroupService {
         Group group = groupServiceHelper.getGroupByIdAndCompanyId(groupId, generalRequestHeaderDto.getCompanyId())
                 .orElseThrow(() -> new GroupServiceException(GROUP_NOT_FOUND));
 
-        GroupResponseDTO dto = groupMapper.toDto(group);
-        //Kullanıcının hali hazırda yetkili olduğu bir grubun parent'ına yetki verince o parent altındaki tüm children'lara yönelik yetki kaydı siliniyor.
-        removeAuthForAllChildren(generalRequestHeader, dto);
-
         TreeOfGroupOfUser treeOfGroupOfUser = treeOfGroupOfUserFactory.createTreeOfGroupOfUser(generalRequestHeader);
 
         treeOfGroupOfUser.getListOfGroupOfUser(userId)
@@ -249,6 +245,11 @@ public class GroupService {
                 .ifPresent(groupDto -> {
                     throw new GroupServiceException(USER_ALREADY_AUTHORIZED_TO_GROUP);
                 });
+
+        GroupResponseDTO dto = groupMapper.toDto(group);
+
+        //Kullanıcının hali hazırda yetkili olduğu bir grubun parent'ına yetki verince o parent altındaki tüm children'lara yönelik yetki kaydı siliniyor.
+        removeAuthForAllChildren(generalRequestHeader, dto);
 
         UserGroupAuthorization userGroupAuthorization = UserGroupAuthorization.builder()
                 .user(user)
