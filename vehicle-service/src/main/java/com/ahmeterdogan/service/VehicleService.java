@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.ahmeterdogan.exception.ApiErrorMessages.*;
+import static com.ahmeterdogan.exception.ApiError.*;
 
 @Service
 public class VehicleService {

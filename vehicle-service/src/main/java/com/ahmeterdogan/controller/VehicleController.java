@@ -11,10 +11,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import static com.ahmeterdogan.constants.ApiUrl.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/vehicles")
+@RequestMapping(VEHICLES)
 public class VehicleController {
 
     private final VehicleService vehicleService;
@@ -23,67 +24,67 @@ public class VehicleController {
         this.vehicleService = vehicleService;
     }
 
-    @PostMapping("/save")
+    @PostMapping(SAVE)
     public ResponseEntity<VehicleResponseDTO> save(@RequestHeader("X-User") String generalRequestHeader, @RequestBody VehicleSaveDTO vehicleSaveDTO) {
         VehicleResponseDTO savedVehicle = vehicleService.saveVehicle(generalRequestHeader, vehicleSaveDTO);
         return ResponseEntity.ok(savedVehicle);
     }
 
 
-    @PostMapping("/saveAll")
+    @PostMapping(SAVE_ALL)
     public ResponseEntity<List<VehicleResponseDTO>> saveAll(@RequestHeader("X-User") String generalRequestHeader, @RequestBody List<VehicleSaveDTO> vehicleSaveDTOList) {
         List<VehicleResponseDTO> vehicleResponseDTOList= vehicleService.saveAll(generalRequestHeader, vehicleSaveDTOList);
         return ResponseEntity.ok(vehicleResponseDTOList);
     }
 
-    @GetMapping("/get-vehicles-by-group-id/{groupId}")
+    @GetMapping(GET_VEHICLES_BY_GROUP_ID)
     List<VehicleResponseDTO> getAllVehiclesByGroupId(@RequestHeader("X-User") String generalRequestHeader, @PathVariable("groupId") long groupId) {
         return vehicleService.getAllVehiclesByGroupId(generalRequestHeader, groupId);
     }
 
-    @GetMapping("/all-for-company-admin")
+    @GetMapping(GET_ALL_VEHICLES_FOR_COMPANY_ADMIN)
     public ResponseEntity<List<VehicleResponseDTO>> getAllVehiclesForCompanyAdmin(@RequestHeader("X-User") String generalRequestHeader) {
         List<VehicleResponseDTO> vehicles = vehicleService.getAllVehicles(generalRequestHeader);
         return ResponseEntity.ok(vehicles);
     }
 
-    @GetMapping("/search-vehicles-by-group-name")
+    @GetMapping(SEARCH_VEHICLES_BY_GROUP_NAME)
     public ResponseEntity<List<VehicleResponseDTO>> getAllVehiclesByGroupId(@RequestHeader("X-User") String generalRequestHeader, @RequestParam("groupName") String groupName) {
         return ResponseEntity.ok(vehicleService.getAllVehiclesByGroupName(generalRequestHeader, groupName));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(GET_VEHICLE_BY_ID)
     public ResponseEntity<VehicleResponseDTO> getVehicleById(@RequestHeader("X-User") String generalRequestHeader, @PathVariable("id") Long vehicleId) {
         return vehicleService.getVehicleById(generalRequestHeader, vehicleId).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/get-directly-authorized-vehicle")
+    @GetMapping(GET_DIRECTLY_AUTHORIZED_VEHICLE)
     public ResponseEntity<List<VehicleResponseDTO>> getDirectlyAuthorizedVehicle(@RequestHeader("X-User") String generalRequestHeader) {
         return ResponseEntity.ok(vehicleService.getDirectlyAuthorizedVehicle(generalRequestHeader));
     }
 
-    @PostMapping("/authorize-user-to-vehicle")
+    @PostMapping(AUTHORIZED_USER_TO_VEHICLE)
     public ResponseEntity authorizeUserToVehicle(@RequestHeader("X-User") String generalRequestHeader, @RequestBody AuthorizeUserToVehicleRequestDTO authorizeUserToVehicleRequestDTO) {
         vehicleService.authorizeUserToVehicle(generalRequestHeader, authorizeUserToVehicleRequestDTO);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{id}/update")
+    @PutMapping(UPDATE)
     public ResponseEntity<VehicleResponseDTO> updateVehicle(@RequestHeader("X-User") String generalRequestHeader, @RequestBody VehicleUpdateDTO vehicleUpdateDTO) {
         return ResponseEntity.ok(vehicleService.updateVehicle(generalRequestHeader, vehicleUpdateDTO));
     }
 
-    @DeleteMapping("/{id}/delete")
+    @DeleteMapping(DELETE)
     public ResponseEntity<Integer> deleteVehicleById(@RequestHeader("X-User") String generalRequestHeader, @PathVariable long id) {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(vehicleService.deleteVehicleByIdAndCompanyId(generalRequestHeader,id));
     }
 
-    @GetMapping("/get-directly-authorized-vehicles-by-user-id")
+    @GetMapping(GET_DIRECTLY_AUTHORIZED_VEHICLE_BY_USER_ID)
     List<VehicleResponseDTO> getDirectlyAuthorizedVehicle(@RequestHeader("X-User") String generalRequestHeader, @RequestParam Long userId) {
         return vehicleService.getDirectlyAuthorizedVehicle(generalRequestHeader, userId);
     }
 
-    @PutMapping("/update-vehicle-group")
+    @PutMapping(UPDATE_VEHICLE_GROUP)
     public ResponseEntity<VehicleResponseDTO> updateVehicleGroup(@RequestHeader("X-User") String generalRequestHeader, @RequestBody VehicleGroupUpdateDTO vehicleGroupUpdateDTO) {
         return ResponseEntity.ok(vehicleService.updateVehicleGroup(generalRequestHeader, vehicleGroupUpdateDTO));
     }

@@ -4,6 +4,8 @@ import com.ahmeterdogan.data.entity.User;
 import com.ahmeterdogan.data.repository.IUserRepository;
 import jakarta.persistence.Column;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -19,6 +21,7 @@ public class UserServiceHelper {
         return userRepository.findById(id);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public User save(User user) {
         return userRepository.save(user);
     }

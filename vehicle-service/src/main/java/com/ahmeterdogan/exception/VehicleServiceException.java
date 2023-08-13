@@ -4,10 +4,10 @@ import lombok.Getter;
 
 @Getter
 public class VehicleServiceException extends RuntimeException{
-    private ApiErrorMessages apiErrorMessages;
+    private ApiError apiError;
 
-    public VehicleServiceException(ApiErrorMessages apiErrorMessages) {
-        this.apiErrorMessages = apiErrorMessages;
+    public VehicleServiceException(ApiError apiError) {
+        this.apiError = apiError;
     }
 
 }
