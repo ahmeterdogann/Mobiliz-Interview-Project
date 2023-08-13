@@ -4,10 +4,10 @@ import lombok.Getter;
 
 @Getter
 public class GroupServiceException extends RuntimeException{
-    private ApiErrorMessages apiErrorMessages;
+    private ApiError apiError;
 
-    public GroupServiceException(ApiErrorMessages apiErrorMessages) {
-        this.apiErrorMessages = apiErrorMessages;
+    public GroupServiceException(ApiError apiError) {
+        this.apiError = apiError;
     }
 
 }

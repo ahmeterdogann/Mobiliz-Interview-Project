@@ -8,6 +8,8 @@ import com.ahmeterdogan.data.repository.IGroupRepository;
 import com.ahmeterdogan.data.repository.IGroupToGroupRepository;
 import com.ahmeterdogan.data.repository.IUserGroupAuthRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.Set;
@@ -74,6 +76,7 @@ public class GroupServiceHelper {
         groupRepository.deleteByIdAndCompany_Id(group.getId(), group.getCompany().getId());
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public void deleteUserGroupAuthByGroupId(long groupId) {
         userGroupAuthRepository.deleteByGroup_Id(groupId);
     }

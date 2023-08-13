@@ -21,13 +21,13 @@ import com.ahmeterdogan.tree.TreeOfGroupOfUserFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.ahmeterdogan.exception.ApiErrorMessages.*;
+import static com.ahmeterdogan.exception.ApiError.*;
 
 @Service
 public class GroupService {
@@ -103,10 +103,12 @@ public class GroupService {
         return treeOfGroupOfUser.buildTreeOfGroupOfUserWithVehicle(generalRequestHeaderDTO.getUserId());
     }
 
-    public Optional<GroupResponseDTO> getGroupByIdAndCompanyId(String generalRequestHeader, long id) {
+        public GroupResponseDTO getGroupByIdAndCompanyId(String generalRequestHeader, long id) {
         GeneralRequestHeaderDTO generalRequestHeaderDto = generalHeaderRequestConverter(generalRequestHeader);
 
-        return groupServiceHelper.getGroupByIdAndCompanyId(id, generalRequestHeaderDto.getCompanyId()).map(groupMapper::toDto);
+        return groupServiceHelper.getGroupByIdAndCompanyId(id, generalRequestHeaderDto.getCompanyId())
+                .map(groupMapper::toDto)
+                .orElseThrow(() -> new GroupServiceException(GROUP_NOT_FOUND));
     }
 
 
@@ -229,8 +231,18 @@ public class GroupService {
                 .map(userMapper::toEntity)
                 .orElseThrow(() -> new GroupServiceException(USER_NOT_FOUND));
 
+        long adminCompanyId = generalRequestHeaderDto.getCompanyId();
+        long userCompanyId = user.getCompany().getId();
+
+        if (adminCompanyId != userCompanyId)
+            throw new GroupServiceException(USER_NOT_FOUND_IN_COMPANY);
+
         Group group = groupServiceHelper.getGroupByIdAndCompanyId(groupId, generalRequestHeaderDto.getCompanyId())
                 .orElseThrow(() -> new GroupServiceException(GROUP_NOT_FOUND));
+
+        GroupResponseDTO dto = groupMapper.toDto(group);
+        //Kullanıcının hali hazırda yetkili olduğu bir grubun parent'ına yetki verince o parent altındaki tüm children'lara yönelik yetki kaydı siliniyor.
+        removeAuthForAllChildren(generalRequestHeader, dto);
 
         TreeOfGroupOfUser treeOfGroupOfUser = treeOfGroupOfUserFactory.createTreeOfGroupOfUser(generalRequestHeader);
 
@@ -248,5 +260,18 @@ public class GroupService {
                 .build();
 
         groupServiceHelper.saveUserGroupAuth(userGroupAuthorization);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void removeAuthForAllChildren(String generalRequestHeader, GroupResponseDTO parent) {
+        TreeOfGroupOfUser treeOfGroupOfUser = treeOfGroupOfUserFactory.createTreeOfGroupOfUser(generalRequestHeader);
+
+        treeOfGroupOfUser.buildTreeOfGroupForSpecificGroup(parent);
+        Set<GroupResponseDTO> allChildren = treeOfGroupOfUser.getAllGroupsInTree();
+
+        allChildren.forEach(child -> {
+                    if (parent.getId() != child.getId())
+                        groupServiceHelper.deleteUserGroupAuthByGroupId(child.getId());
+                });
     }
 }

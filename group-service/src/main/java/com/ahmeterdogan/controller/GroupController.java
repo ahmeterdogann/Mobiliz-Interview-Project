@@ -11,8 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Set;
 
+import static com.ahmeterdogan.constants.ApiUrl.*;
+
 @RestController
-@RequestMapping("api/v1/groups")
+@RequestMapping(GROUPS)
 public class GroupController {
     private final GroupService groupService;
     private final ObjectMapper objectMapper;
@@ -22,43 +24,44 @@ public class GroupController {
         this.objectMapper = objectMapper;
     }
 
-    @PostMapping("/save")
+    @PostMapping(SAVE)
     public ResponseEntity<GroupResponseDTO> save(@RequestHeader("X-User") String generalRequestHeader, @RequestBody GroupSaveDTO groupSaveDTO) {
         return ResponseEntity.ok(groupService.saveGroup(generalRequestHeader, groupSaveDTO));
     }
 
-    @GetMapping("/user-vehicles-tree")
+    @GetMapping(USER_VEHICLES_TREE)
     public ResponseEntity<Set<GroupVehicleTreeResponseDTO>> getTreeOfVehiclesOfUser(@RequestHeader("X-User") String generalRequestHeader) {
         return ResponseEntity.ok(groupService.getTreeOfGroupUserWithVehicle(generalRequestHeader));
     }
 
-    @GetMapping("/user-vehicles-list")
+    @GetMapping(USER_VEHICLES_LIST)
     public ResponseEntity<Set<VehicleResponseDTO>> getListOfVehiclesOfUser(@RequestHeader("X-User") String generalRequestHeader) {
         return ResponseEntity.ok(groupService.getUserVehicleList(generalRequestHeader));
     }
 
-    @GetMapping("/user-vehicles-list-by-user-id")
+    @GetMapping(USER_VEHICLES_LIST_BY_USER_ID)
     public ResponseEntity<Set<VehicleResponseDTO>> getListOfVehiclesOfUser(@RequestHeader("X-User") String generalRequestHeader, @RequestParam Long userId) {
         return ResponseEntity.ok(groupService.getUserVehicleList(generalRequestHeader, userId));
     }
 
-    @GetMapping("/user-groups-list")
+    @GetMapping(USER_GROUPS_LIST)
     public ResponseEntity<Set<GroupResponseDTO>> getListOfGroupsOfUser(@RequestHeader("X-User") String generalRequestHeader) {
         return ResponseEntity.ok(groupService.getListOfGroupOfUser(generalRequestHeader));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(FIND_BY_ID)
     public ResponseEntity<GroupResponseDTO> getGroupById(@RequestHeader("X-User") String generalRequestHeader, @PathVariable("id") long id) {
-        return groupService.getGroupByIdAndCompanyId(generalRequestHeader, id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(groupService.getGroupByIdAndCompanyId(generalRequestHeader, id));
     }
 
-    @PostMapping("/authorize-user-to-group")
+
+    @PostMapping(AUTHORIZE_USER_TO_GROUP)
     public ResponseEntity authorizeUserToGroup(@RequestHeader("X-User") String generalRequestHeader, @RequestParam("userId") Long userId, @RequestParam("groupId") Long groupId) {
         groupService.authorizeUserToGroup(generalRequestHeader, userId, groupId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @DeleteMapping("/{id}/delete")
+    @DeleteMapping(DELETE)
     public ResponseEntity deleteGroup(@RequestHeader("X-User") String generalRequestHeader, @PathVariable("id") long id) {
         groupService.deleteGroupByIdAndCompanyId(generalRequestHeader,id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

@@ -7,6 +7,7 @@ import com.ahmeterdogan.dto.response.GroupVehicleTreeResponseDTO;
 import com.ahmeterdogan.dto.response.VehicleResponseDTO;
 import com.ahmeterdogan.feign.IVehicleServiceFeign;
 import com.ahmeterdogan.mapper.IGroupMapper;
+import lombok.Getter;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 
 @Component
 @Scope("prototype")
+@Getter
 public class TreeOfGroupOfUser {
     private final GroupServiceHelper groupServiceHelper;
     private final IVehicleServiceFeign vehicleServiceFeign;
@@ -43,35 +45,23 @@ public class TreeOfGroupOfUser {
         Set<GroupResponseDTO> groups = getUserGroupAuth(userId);
         Set<GroupVehicleTreeResponseDTO> trees = new HashSet<>();
 
-        for (GroupResponseDTO group : groups) {
+        groups.forEach(group -> {
             allGroupsInTree.add(group);
             trees.add(convertToGroupVehicleDTO(group));
-        }
-
-        return trees;
-    }
-
-    public Set<GroupTreeDto> buildTreeOfGroupOfUser(long userId) {
-        Set<GroupResponseDTO> groups = getUserGroupAuth(userId);
-        Set<GroupTreeDto> trees = new HashSet<>();
-
-        for (GroupResponseDTO group : groups) {
-            allGroupsInTree.add(group);
-            trees.add(convertToGroupDto(group));
-        }
+        });
 
         return trees;
     }
 
     private GroupVehicleTreeResponseDTO convertToGroupVehicleDTO(GroupResponseDTO groupResponseDTO) {
         GroupVehicleTreeResponseDTO groupVehicleTreeResponseDTO = new GroupVehicleTreeResponseDTO(groupResponseDTO.getId(), groupResponseDTO.getName());
-
         Set<GroupResponseDTO> childrenGroups = getChildren(groupResponseDTO);
-        for (GroupResponseDTO childGroup : childrenGroups) {
+
+        childrenGroups.forEach(childGroup -> {
             allGroupsInTree.add(childGroup);
             GroupVehicleTreeResponseDTO childDto = convertToGroupVehicleDTO(childGroup);
             groupVehicleTreeResponseDTO.addChild(childDto);
-        }
+        });
 
         List<VehicleResponseDTO> vehicles = vehicleServiceFeign.getAllVehiclesByGroupId(generalRequestHeader, groupResponseDTO.getId());
         groupVehicleTreeResponseDTO.setVehiclesOfGroup(vehicles);
@@ -79,19 +69,46 @@ public class TreeOfGroupOfUser {
         return groupVehicleTreeResponseDTO;
     }
 
+    public Set<GroupTreeDto> buildTreeOfGroupOfUser(long userId) {
+        Set<GroupResponseDTO> groups = getUserGroupAuth(userId);
+        Set<GroupTreeDto> trees = new HashSet<>();
+
+        groups.forEach(group -> {
+            allGroupsInTree.add(group);
+            trees.add(convertToGroupDto(group));
+        });
+
+        return trees;
+    }
+
     private GroupTreeDto convertToGroupDto(GroupResponseDTO groupResponseDTO) {
         GroupTreeDto groupTreeDto = new GroupTreeDto(groupResponseDTO.getId(), groupResponseDTO.getName());
 
         Set<GroupResponseDTO> childGroups = getChildren(groupResponseDTO);
-        for (GroupResponseDTO childGroup : childGroups) {
+
+        childGroups.forEach(childGroup -> {
             allGroupsInTree.add(childGroup);
             GroupTreeDto childDto = convertToGroupDto(childGroup);
             groupTreeDto.addChild(childDto);
-        }
+        });
 
         return groupTreeDto;
     }
 
+    public void buildTreeOfGroupForSpecificGroup(GroupResponseDTO groupResponseDTO) {
+        Set<GroupResponseDTO> groups = groupServiceHelper.getChildren(groupMapper.toEntity(groupResponseDTO))
+                .stream()
+                .map(groupMapper::toDto)
+                .collect(Collectors.toSet());
+
+        Set<GroupTreeDto> trees = new HashSet<>();
+
+        groups.forEach(group -> {
+                    allGroupsInTree.add(group);
+                    trees.add(convertToGroupDto(groupResponseDTO));
+
+        });
+    }
 
     public Set<VehicleResponseDTO> getListOfVehiclesOfUser(long userId) {
         buildTreeOfGroupOfUserWithVehicle(userId);
