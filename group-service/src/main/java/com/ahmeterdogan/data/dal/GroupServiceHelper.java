@@ -3,7 +3,6 @@ package com.ahmeterdogan.data.dal;
 import com.ahmeterdogan.data.entity.Group;
 import com.ahmeterdogan.data.entity.GroupToGroup;
 import com.ahmeterdogan.data.entity.UserGroupAuthorization;
-import com.ahmeterdogan.data.entity.UserVehicleAuthorization;
 import com.ahmeterdogan.data.repository.IGroupRepository;
 import com.ahmeterdogan.data.repository.IGroupToGroupRepository;
 import com.ahmeterdogan.data.repository.IUserGroupAuthRepository;

@@ -131,13 +131,9 @@ public class GroupService {
     }
 
     public Set<GroupResponseDTO> getListOfGroupOfUser(String generalRequestHeader) {
-        try {
-            GeneralRequestHeaderDTO generalRequestHeaderDto = objectMapper.readValue(generalRequestHeader, GeneralRequestHeaderDTO.class);
-            TreeOfGroupOfUser treeOfGroupOfUser = treeOfGroupOfUserFactory.createTreeOfGroupOfUser(generalRequestHeader);
-            return treeOfGroupOfUser.getListOfGroupOfUser(generalRequestHeaderDto.getUserId());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        GeneralRequestHeaderDTO generalRequestHeaderDto = generalHeaderRequestConverter(generalRequestHeader);
+        TreeOfGroupOfUser treeOfGroupOfUser = treeOfGroupOfUserFactory.createTreeOfGroupOfUser(generalRequestHeader);
+        return treeOfGroupOfUser.getListOfGroupOfUser(generalRequestHeaderDto.getUserId());
     }
 
     private boolean isAdmin(GeneralRequestHeaderDTO generalRequestHeaderDto) {

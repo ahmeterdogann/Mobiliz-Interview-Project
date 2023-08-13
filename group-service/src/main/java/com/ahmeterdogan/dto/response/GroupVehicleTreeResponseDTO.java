@@ -1,9 +1,9 @@
 package com.ahmeterdogan.dto.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.util.*;
 
 @Data
@@ -13,6 +13,7 @@ public class GroupVehicleTreeResponseDTO {
     private Long id;
     private String name;
     private List<VehicleResponseDTO> vehiclesOfGroup;
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY)
     private Set<GroupVehicleTreeResponseDTO> children;
     public static List<VehicleResponseDTO> allVehiclesInTree = new ArrayList<>();
 
@@ -26,14 +27,6 @@ public class GroupVehicleTreeResponseDTO {
 
     public void addChild(GroupVehicleTreeResponseDTO groupVehicleTreeResponseDTO) {
         children.add(groupVehicleTreeResponseDTO);
-    }
-
-    public static List<VehicleResponseDTO> getAllVehiclesInTree() {
-        return allVehiclesInTree;
-    }
-
-    public static void setAllVehiclesInTree(List<VehicleResponseDTO> allVehiclesInTree) {
-        GroupVehicleTreeResponseDTO.allVehiclesInTree = allVehiclesInTree;
     }
 
     @Override

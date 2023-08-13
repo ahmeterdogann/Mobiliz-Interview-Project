@@ -10,5 +10,5 @@ public interface ApiUrl {
     String USER_GROUPS_LIST = "/user-groups-list";
     String FIND_BY_ID = "/{id}";
     String AUTHORIZE_USER_TO_GROUP = "/authorize-user-to-group";
-    String DELETE = "{id}/delete";
+    String DELETE = "/delete";
 }

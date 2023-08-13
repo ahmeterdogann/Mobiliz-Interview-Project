@@ -3,7 +3,6 @@ package com.ahmeterdogan.feign;
 import com.ahmeterdogan.dto.request.VehicleGroupUpdateDTO;
 import com.ahmeterdogan.dto.response.VehicleResponseDTO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +17,7 @@ public interface IVehicleServiceFeign {
     List<VehicleResponseDTO> getDirectlyAuthorizedVehicle(@RequestHeader("X-User") String generalRequestHeader);
 
     @GetMapping("/get-directly-authorized-vehicles-by-user-id")
-    List<VehicleResponseDTO> getDirectlyAuthorizedVehicle(@RequestHeader("X-User") String generalRequestHeader, @RequestParam Long userId);
+    List<VehicleResponseDTO> getDirectlyAuthorizedVehicle(@RequestHeader("X-User") String generalRequestHeader, @RequestParam("userId") Long userId);
 
     @PutMapping("/update-vehicle-group")
     VehicleResponseDTO updateVehicleGroup(@RequestHeader("X-User") String generalRequestHeader, @RequestBody VehicleGroupUpdateDTO vehicleGroupUpdateDTO);
